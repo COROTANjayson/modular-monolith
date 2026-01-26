@@ -1,0 +1,134 @@
+<mjml>
+  <mj-head>
+    <mj-title>Verify Your Email</mj-title>
+    <mj-preview
+      >Please verify your email address to complete registration</mj-preview
+    >
+    <mj-attributes>
+      <mj-all
+        font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+      ></mj-all>
+      <mj-text
+        font-weight="400"
+        font-size="16px"
+        color="#000000"
+        line-height="24px"
+      ></mj-text>
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f4f4f4">
+    <mj-section
+      background-color="#ffffff"
+      padding-bottom="20px"
+      padding-top="20px"
+    >
+      <mj-column>
+        <mj-text
+          align="center"
+          font-size="28px"
+          font-weight="bold"
+          color="#1a1a1a"
+          padding-bottom="10px"
+        >
+          Verify Your Email Address
+        </mj-text>
+        <mj-divider border-color="#e0e0e0" border-width="1px"></mj-divider>
+      </mj-column>
+    </mj-section>
+
+    <mj-section
+      background-color="#ffffff"
+      padding-bottom="40px"
+      padding-top="20px"
+    >
+      <mj-column>
+        <mj-text font-size="16px" color="#555555" line-height="24px">
+          Hello,
+        </mj-text>
+        <mj-text
+          font-size="16px"
+          color="#555555"
+          line-height="24px"
+          padding-top="10px"
+        >
+          Thank you for registering! Please verify your email address to
+          complete your account setup.
+        </mj-text>
+        <mj-text
+          font-size="16px"
+          color="#555555"
+          line-height="24px"
+          padding-top="10px"
+        >
+          Click the button below to verify your email:
+        </mj-text>
+
+        <mj-button
+          background-color="#4CAF50"
+          color="#ffffff"
+          font-size="16px"
+          font-weight="bold"
+          border-radius="4px"
+          padding-top="20px"
+          padding-bottom="20px"
+          href="{{verificationLink}}"
+        >
+          Verify Email Address
+        </mj-button>
+
+        <mj-text
+          font-size="14px"
+          color="#888888"
+          line-height="20px"
+          padding-top="20px"
+        >
+          Or copy and paste this link into your browser:
+        </mj-text>
+        <mj-text
+          font-size="13px"
+          color="#4CAF50"
+          line-height="20px"
+          padding-top="5px"
+        >
+          {{verificationLink}}
+        </mj-text>
+
+        <mj-divider
+          border-color="#e0e0e0"
+          border-width="1px"
+          padding-top="30px"
+        ></mj-divider>
+
+        <mj-text
+          font-size="13px"
+          color="#999999"
+          line-height="20px"
+          padding-top="15px"
+        >
+          This link will expire in 30 minutes for security reasons.
+        </mj-text>
+        <mj-text
+          font-size="13px"
+          color="#999999"
+          line-height="20px"
+          padding-top="5px"
+        >
+          If you didn't create an account, you can safely ignore this email.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#f4f4f4" padding-top="20px">
+      <mj-column>
+        <mj-text
+          align="center"
+          font-size="12px"
+          color="#999999"
+          line-height="18px"
+        >
+          © {{currentYear}} {{appName}}. All rights reserved.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

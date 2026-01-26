@@ -1,0 +1,33 @@
+services:
+  # Your Express API
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+      # Connect to the redis service defined below on port 6379
+      - REDIS_URL=redis://redis:6379
+    # Load other env vars from .env file (supa, auth secrets, etc.)
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    # Mount current directory to /app in container for hot-reloading (optional for dev)
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  # Redis Database
+  redis:
+    image: redis:alpine
+    # IMPORTANT: Enforce noeviction policy
+    command: redis-server --maxmemory-policy noeviction
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
