@@ -1,8 +1,3 @@
-/**
- * Infrastructure Layer - JWT Token Generator Implementation
- * Implements ITokenGenerator port from Application layer
- */
-
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { ITokenGenerator } from "../application/ports";
@@ -11,7 +6,7 @@ import {
   ACCESS_EXPIRES,
   REFRESH_SECRET,
   REFRESH_EXPIRES,
-} from "../../../shared/utils/config";
+} from "../../../utils/config";
 
 export class JwtTokenGenerator implements ITokenGenerator {
   generateAccessToken(payload: { id: string; email: string }): string {

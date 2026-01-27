@@ -1,9 +1,3 @@
-/**
- * Application Layer - Logout Use Case
- * Orchestrates domain logic and depends only on Domain + Ports
- * NO direct infrastructure imports
- */
-
 import { IUserRepository, ITokenGenerator } from "./ports";
 
 export class LogoutUseCase {

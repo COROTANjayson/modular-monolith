@@ -1,8 +1,3 @@
-/**
- * Infrastructure Layer - Bcrypt Password Hasher Implementation
- * Implements IPasswordHasher port from Application layer
- */
-
 import bcrypt from "bcrypt";
 import { IPasswordHasher } from "../application/ports";
 

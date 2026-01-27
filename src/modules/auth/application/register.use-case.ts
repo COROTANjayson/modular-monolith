@@ -1,9 +1,3 @@
-/**
- * Application Layer - Register Use Case
- * Orchestrates domain logic and depends only on Domain + Ports
- * NO direct infrastruture imports
- */
-
 import { AuthRules } from "../domain/auth-rules";
 import {
   IUserRepository,
@@ -11,7 +5,7 @@ import {
   ITokenGenerator,
   IEmailService,
 } from "./ports";
-import { RegisterInput, RegisterOutput } from "./dtos";
+import { RegisterInput, RegisterOutput } from "./auth.dto";;
 
 export class RegisterUseCase {
   constructor(

@@ -1,8 +1,12 @@
 import { Resend } from "resend";
 import { RESEND_API_KEY, RESEND_SENDER_EMAIL, CLIENT_URL } from "./config";
-import { queueEmail as addEmailToQueue, EmailJob } from "../queues/email.queue";
+// import { queueEmail as addEmailToQueue, EmailJob } from "../queues/email.queue";
 import { renderEmailTemplate } from "./email-renderer";
-import { logger } from "../libs/logger";
+import { logger } from "../infra/logger";
+import {
+  queueEmail as addEmailToQueue,
+  EmailJob,
+} from "../../queues/email.queue";
 
 export class EmailService {
   private resend: Resend | null = null;
@@ -13,7 +17,7 @@ export class EmailService {
       logger.info("Resend Initialized");
     } else {
       logger.warn(
-        "Resend credentials not found. Email sending will be simulated."
+        "Resend credentials not found. Email sending will be simulated.",
       );
     }
   }

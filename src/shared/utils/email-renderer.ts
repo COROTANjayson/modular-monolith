@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import mjml2html from "mjml";
-import { logger } from "../libs/logger";
+import { logger } from "../infra/logger";
 
 // Cache compiled templates for performance
 const templateCache = new Map<string, string>();

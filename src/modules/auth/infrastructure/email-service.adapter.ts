@@ -1,10 +1,5 @@
-/**
- * Infrastructure Layer - Email Service Adapter
- * Implements IEmailService port from Application layer
- */
-
+import { EmailService as ExistingEmailService } from "../../../shared/utils/email.service";
 import { IEmailService } from "../application/ports";
-import { EmailService as ExistingEmailService } from "../../../utils/email.service";
 
 export class EmailServiceAdapter implements IEmailService {
   private emailService = new ExistingEmailService();

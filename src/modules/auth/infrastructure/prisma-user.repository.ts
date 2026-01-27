@@ -1,8 +1,3 @@
-/**
- * Infrastructure Layer - Prisma User Repository Implementation
- * Implements IUserRepository port from Application layer
- */
-
 import { prisma } from "../../../shared/infra/prisma";
 import { IUserRepository } from "../application/ports";
 import { User, UserCreateData, UserUpdateData } from "../domain/user.entity";

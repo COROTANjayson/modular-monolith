@@ -17,8 +17,8 @@ import {
 // const redisUrl = process.env.REDIS_URL;
 // const redis = redisUrl ? new Redis(redisUrl) : null;
 
-import { EmailService } from "../../utils/email.service";
 import { logger } from "../../libs/logger";
+import { EmailService } from "../../shared/utils/email.service";
 
 export default class AuthService {
   private userRepo = new UserRepository();
@@ -87,7 +87,7 @@ export default class AuthService {
     const refreshToken = generateToken(
       { ...payload, jti },
       REFRESH_SECRET,
-      REFRESH_EXPIRES
+      REFRESH_EXPIRES,
     );
 
     return { accessToken, refreshToken };
@@ -117,7 +117,7 @@ export default class AuthService {
       const refreshToken = generateToken(
         { ...payload, jti: nextJti },
         REFRESH_SECRET,
-        REFRESH_EXPIRES
+        REFRESH_EXPIRES,
       );
 
       // Strategy B (stateful): verify token matches Redis stored token

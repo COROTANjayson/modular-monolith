@@ -1,12 +1,6 @@
-/**
- * Application Layer - Login Use Case
- * Orchestrates domain logic and depends only on Domain + Ports
- * NO direct infrastructure imports
- */
-
 import { AuthRules } from "../domain/auth-rules";
 import { IUserRepository, IPasswordHasher, ITokenGenerator } from "./ports";
-import { LoginInput, AuthTokens } from "./dtos";
+import { LoginInput, AuthTokens } from "./auth.dto";
 
 export class LoginUseCase {
   constructor(

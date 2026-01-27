@@ -1,12 +1,6 @@
-/**
- * Application Layer - Refresh Token Use Case
- * Orchestrates domain logic and depends only on Domain + Ports
- * NO direct infrastructure imports
- */
-
 import { AuthRules } from "../domain/auth-rules";
 import { IUserRepository, ITokenGenerator } from "./ports";
-import { AuthTokens } from "./dtos";
+import { AuthTokens } from "./auth.dto";
 
 export class RefreshTokenUseCase {
   constructor(
