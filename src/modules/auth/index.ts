@@ -7,7 +7,7 @@
 import { Router } from "express";
 
 // Infrastructure implementations
-import { PrismaUserRepository } from "./infrastructure/prisma-user.repository";
+import { PrismaAuthUserRepository } from "./infrastructure/prisma-auth-user.repository";
 import { BcryptPasswordHasher } from "./infrastructure/bcrypt-password-hasher";
 import { JwtTokenGenerator } from "./infrastructure/jwt-token-generator";
 import { EmailServiceAdapter } from "./infrastructure/email-service.adapter";
@@ -29,7 +29,7 @@ import { createAuthRouter } from "./interface/auth.routes";
  */
 export function createAuthModule(): { router: Router } {
   // Infrastructure (adapters)
-  const userRepo = new PrismaUserRepository();
+  const userRepo = new PrismaAuthUserRepository();
   const passwordHasher = new BcryptPasswordHasher();
   const tokenGenerator = new JwtTokenGenerator();
   const emailService = new EmailServiceAdapter();

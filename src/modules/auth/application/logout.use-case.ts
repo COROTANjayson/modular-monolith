@@ -1,8 +1,8 @@
-import { IUserRepository, ITokenGenerator } from "./ports";
+import { IAuthUserRepository, ITokenGenerator } from "./ports";
 
 export class LogoutUseCase {
   constructor(
-    private userRepo: IUserRepository,
+    private userRepo: IAuthUserRepository,
     private tokenGenerator: ITokenGenerator,
   ) {}
 

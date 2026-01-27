@@ -1,12 +1,12 @@
 import { Worker, Job } from "bullmq";
 import { getRedisClient } from "../libs/redis.config";
 import { EmailJobData } from "../queues/email.queue";
-import { EmailService } from "../utils/email.service";
 import {
   EMAIL_QUEUE_RATE_LIMIT,
   EMAIL_QUEUE_RATE_DURATION,
 } from "../utils/config";
 import { logger } from "../libs/logger";
+import { EmailService } from "../shared/utils/email.service";
 
 let emailWorker: Worker<EmailJobData> | null = null;
 
@@ -30,7 +30,7 @@ export function startEmailWorker(): Worker<EmailJobData> | null {
       logger.info(
         `Processing email job ${job.id} (attempt ${job.attemptsMade + 1}/${
           job.opts.attempts
-        })`
+        })`,
       );
 
       try {
@@ -58,7 +58,7 @@ export function startEmailWorker(): Worker<EmailJobData> | null {
           }
         : undefined,
       concurrency: 1,
-    }
+    },
   );
 
   // Event listeners for monitoring

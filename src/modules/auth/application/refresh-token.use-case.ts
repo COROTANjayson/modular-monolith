@@ -1,10 +1,10 @@
 import { AuthRules } from "../domain/auth-rules";
-import { IUserRepository, ITokenGenerator } from "./ports";
+import { IAuthUserRepository, ITokenGenerator } from "./ports";
 import { AuthTokens } from "./auth.dto";
 
 export class RefreshTokenUseCase {
   constructor(
-    private userRepo: IUserRepository,
+    private userRepo: IAuthUserRepository,
     private tokenGenerator: ITokenGenerator,
   ) {}
 

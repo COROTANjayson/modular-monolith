@@ -1,15 +1,12 @@
 /**
- * Domain Layer - User Entity
+ * Domain Layer - Auth User Entity
  * Pure business logic - NO infrastructure dependencies
  */
 
-export interface User {
+export interface AuthUser {
   id: string;
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  age?: number | null;
   isVerified: boolean;
   verificationToken: string | null;
   verificationTokenExpires: Date | null;
@@ -18,18 +15,15 @@ export interface User {
   updatedAt: Date;
 }
 
-export interface UserCreateData {
+export interface AuthUserCreateData {
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  age?: number;
   verificationToken: string;
   verificationTokenExpires: Date;
   isVerified: boolean;
 }
 
-export interface UserUpdateData {
+export interface AuthUserUpdateData {
   currentTokenId?: string | null;
   isVerified?: boolean;
   verificationToken?: string | null;

@@ -1,10 +1,10 @@
 import { AuthRules } from "../domain/auth-rules";
-import { IUserRepository, IPasswordHasher, ITokenGenerator } from "./ports";
+import { IAuthUserRepository, IPasswordHasher, ITokenGenerator } from "./ports";
 import { LoginInput, AuthTokens } from "./auth.dto";
 
 export class LoginUseCase {
   constructor(
-    private userRepo: IUserRepository,
+    private userRepo: IAuthUserRepository,
     private passwordHasher: IPasswordHasher,
     private tokenGenerator: ITokenGenerator,
   ) {}

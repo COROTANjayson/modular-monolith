@@ -1,9 +1,9 @@
 import { AuthRules } from "../domain/auth-rules";
-import { IUserRepository, ITokenGenerator, IEmailService } from "./ports";
+import { IAuthUserRepository, ITokenGenerator, IEmailService } from "./ports";
 
 export class ResendVerificationUseCase {
   constructor(
-    private userRepo: IUserRepository,
+    private userRepo: IAuthUserRepository,
     private tokenGenerator: ITokenGenerator,
     private emailService: IEmailService,
   ) {}

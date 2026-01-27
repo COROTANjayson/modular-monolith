@@ -4,17 +4,21 @@
  * Domain + Application layers depend on these, Infrastructure implements them
  */
 
-import { User, UserCreateData, UserUpdateData } from "../domain/user.entity";
+import {
+  AuthUser,
+  AuthUserCreateData,
+  AuthUserUpdateData,
+} from "../domain/auth-user.entity";
 
 /**
  * Repository port - defines data access contract
  */
-export interface IUserRepository {
-  create(data: UserCreateData): Promise<User>;
-  update(id: string, data: UserUpdateData): Promise<User>;
-  findById(id: string): Promise<User | null>;
-  findByEmail(email: string): Promise<User | null>;
-  findByVerificationToken(token: string): Promise<User | null>;
+export interface IAuthUserRepository {
+  create(data: AuthUserCreateData): Promise<AuthUser>;
+  update(id: string, data: AuthUserUpdateData): Promise<AuthUser>;
+  findById(id: string): Promise<AuthUser | null>;
+  findByEmail(email: string): Promise<AuthUser | null>;
+  findByVerificationToken(token: string): Promise<AuthUser | null>;
 }
 
 /**

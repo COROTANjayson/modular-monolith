@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import { createAuthModule } from "./modules/auth";
-import { usersRouter } from "./domains/user/user.routes";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import {
@@ -46,11 +45,9 @@ app.get("/csrf-token", (req, res) => {
 // Initialize auth module
 const { router: authRouter } = createAuthModule();
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/users", usersRouter);
 
 // Auto-issue CSRF token cookie if missing
 app.use(csrfTokenMiddleware);
-// export const csrfProtection = csrf({ cookie: true });
 
 app.get("/", (_req, res) =>
   res.json({ ok: true, message: "Express TypeScript Domain Backend" }),

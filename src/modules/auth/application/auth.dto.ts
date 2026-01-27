@@ -1,14 +1,6 @@
-/**
- * Application Layer - DTOs (Data Transfer Objects)
- * Input/Output contracts for use cases
- */
-
 export interface RegisterInput {
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  age?: number;
 }
 
 export interface LoginInput {

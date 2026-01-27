@@ -1,15 +1,15 @@
 import { AuthRules } from "../domain/auth-rules";
 import {
-  IUserRepository,
+  IAuthUserRepository,
   IPasswordHasher,
   ITokenGenerator,
   IEmailService,
 } from "./ports";
-import { RegisterInput, RegisterOutput } from "./auth.dto";;
+import { RegisterInput, RegisterOutput } from "./auth.dto";
 
 export class RegisterUseCase {
   constructor(
-    private userRepo: IUserRepository,
+    private userRepo: IAuthUserRepository,
     private passwordHasher: IPasswordHasher,
     private tokenGenerator: ITokenGenerator,
     private emailService: IEmailService,
@@ -43,9 +43,6 @@ export class RegisterUseCase {
     const user = await this.userRepo.create({
       email: input.email,
       password: hashedPassword,
-      firstName: input.firstName,
-      lastName: input.lastName,
-      age: input.age,
       verificationToken,
       verificationTokenExpires,
       isVerified: false,

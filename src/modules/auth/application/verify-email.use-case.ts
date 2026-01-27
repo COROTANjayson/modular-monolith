@@ -1,8 +1,8 @@
 import { AuthRules } from "../domain/auth-rules";
-import { IUserRepository } from "./ports";
+import { IAuthUserRepository } from "./ports";
 
 export class VerifyEmailUseCase {
-  constructor(private userRepo: IUserRepository) {}
+  constructor(private userRepo: IAuthUserRepository) {}
 
   async execute(token: string): Promise<{ message: string }> {
     const user = await this.userRepo.findByVerificationToken(token);
