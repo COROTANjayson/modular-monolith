@@ -17,6 +17,10 @@ export class UpdatePasswordUseCase {
 
     // Verify old password if provided
     if (input.oldPassword) {
+      if (input.oldPassword === input.newPassword) {
+        throw new Error("New password cannot be the same as the old password");
+      }
+
       const isPasswordValid = await this.passwordHasher.compare(
         input.oldPassword,
         user.password,

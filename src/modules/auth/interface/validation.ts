@@ -35,4 +35,8 @@ export const updatePasswordSchema = z
     oldPassword: z.string().min(6),
     newPassword: z.string().min(6),
   })
-  .strict();
+  .strict()
+  .refine((data) => data.newPassword !== data.oldPassword, {
+    message: "New password cannot be the same as the old password",
+    path: ["newPassword"],
+  });
