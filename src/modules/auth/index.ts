@@ -19,14 +19,12 @@ import { RefreshTokenUseCase } from "./application/refresh-token.use-case";
 import { LogoutUseCase } from "./application/logout.use-case";
 import { VerifyEmailUseCase } from "./application/verify-email.use-case";
 import { ResendVerificationUseCase } from "./application/resend-verification.use-case";
+import { UpdatePasswordUseCase } from "./application/update-password.use-case";
 
 // Interface
 import { AuthController } from "./interface/auth.controller";
 import { createAuthRouter } from "./interface/auth.routes";
 
-/**
- * Factory function to create and wire up the Auth module
- */
 export function createAuthModule(): { router: Router } {
   // Infrastructure (adapters)
   const userRepo = new PrismaAuthUserRepository();
@@ -54,6 +52,10 @@ export function createAuthModule(): { router: Router } {
     tokenGenerator,
     emailService,
   );
+  const updatePasswordUseCase = new UpdatePasswordUseCase(
+    userRepo,
+    passwordHasher,
+  );
 
   // Controller (interface layer)
   const controller = new AuthController(
@@ -63,6 +65,7 @@ export function createAuthModule(): { router: Router } {
     logoutUseCase,
     verifyEmailUseCase,
     resendVerificationUseCase,
+    updatePasswordUseCase,
   );
 
   // Router

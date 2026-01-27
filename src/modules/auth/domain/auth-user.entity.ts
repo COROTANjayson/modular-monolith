@@ -24,6 +24,7 @@ export interface AuthUserCreateData {
 }
 
 export interface AuthUserUpdateData {
+  password?: string;
   currentTokenId?: string | null;
   isVerified?: boolean;
   verificationToken?: string | null;

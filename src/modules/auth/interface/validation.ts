@@ -30,3 +30,9 @@ export const resendVerificationSchema = z
     email: z.string().email(),
   })
   .strict();
+export const updatePasswordSchema = z
+  .object({
+    oldPassword: z.string().min(6),
+    newPassword: z.string().min(6),
+  })
+  .strict();

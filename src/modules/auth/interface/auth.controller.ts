@@ -27,6 +27,7 @@ import {
   loginSchema,
   verifyEmailSchema,
   resendVerificationSchema,
+  updatePasswordSchema,
 } from "./validation";
 
 // Import use cases
@@ -36,6 +37,7 @@ import { RefreshTokenUseCase } from "../application/refresh-token.use-case";
 import { LogoutUseCase } from "../application/logout.use-case";
 import { VerifyEmailUseCase } from "../application/verify-email.use-case";
 import { ResendVerificationUseCase } from "../application/resend-verification.use-case";
+import { UpdatePasswordUseCase } from "../application/update-password.use-case";
 
 export class AuthController {
   constructor(
@@ -45,6 +47,7 @@ export class AuthController {
     private logoutUseCase: LogoutUseCase,
     private verifyEmailUseCase: VerifyEmailUseCase,
     private resendVerificationUseCase: ResendVerificationUseCase,
+    private updatePasswordUseCase: UpdatePasswordUseCase,
   ) {}
 
   async register(req: Request, res: Response) {
@@ -197,6 +200,36 @@ export class AuthController {
         email: req.body.email,
       });
       return errorResponse(res, err.statusCode || 500, err.message);
+    }
+  }
+  async updatePassword(req: Request, res: Response) {
+    try {
+      const payload = req.body;
+      const userId = (req as any).userId;
+
+      validation(res, updatePasswordSchema, payload);
+
+      await this.updatePasswordUseCase.execute({
+        userId,
+        oldPassword: payload.oldPassword,
+        newPassword: payload.newPassword,
+      });
+
+      logger.info("Password updated successfully:", { userId });
+      return successResponse(res, {}, 200, "Password updated successfully");
+    } catch (err: any) {
+      if (err instanceof AppError) {
+        logger.error("Password update failed:", {
+          error: err.message,
+          userId: (req as any).userId,
+        });
+        return errorResponse(res, err.statusCode, err.message);
+      }
+      logger.error("Password update error:", {
+        error: err.message,
+        userId: (req as any).userId,
+      });
+      return errorResponse(res, 500, "Internal server error", err);
     }
   }
 }

@@ -5,6 +5,7 @@
 
 import { Router } from "express";
 import { AuthController } from "./auth.controller";
+import { authMiddleware } from "./auth.middleware";
 
 export function createAuthRouter(controller: AuthController): Router {
   const router = Router();
@@ -18,6 +19,13 @@ export function createAuthRouter(controller: AuthController): Router {
     controller.resendVerification.bind(controller),
   );
   router.post("/logout", controller.logout.bind(controller));
+
+  // Protected routes
+  router.patch(
+    "/password",
+    authMiddleware,
+    controller.updatePassword.bind(controller),
+  );
 
   return router;
 }
