@@ -9,7 +9,7 @@ import { RegisterInput, RegisterOutput } from "./auth.dto";
 
 export class RegisterUseCase {
   constructor(
-    private userRepo: IAuthUserRepository,
+    private authUserRepo: IAuthUserRepository,
     private passwordHasher: IPasswordHasher,
     private tokenGenerator: ITokenGenerator,
     private emailService: IEmailService,
@@ -27,7 +27,7 @@ export class RegisterUseCase {
     }
 
     // Check if user exists
-    const existing = await this.userRepo.findByEmail(input.email);
+    const existing = await this.authUserRepo.findByEmail(input.email);
     if (existing) {
       throw new Error("Email already registered");
     }
@@ -40,7 +40,7 @@ export class RegisterUseCase {
     const verificationTokenExpires = AuthRules.getVerificationTokenExpiry();
 
     // Create user
-    const user = await this.userRepo.create({
+    const user = await this.authUserRepo.create({
       email: input.email,
       password: hashedPassword,
       verificationToken,
@@ -54,7 +54,7 @@ export class RegisterUseCase {
 
     // Auto-login after registration
     const jti = this.tokenGenerator.generateUUID();
-    await this.userRepo.update(user.id, { currentTokenId: jti });
+    await this.authUserRepo.update(user.id, { currentTokenId: jti });
 
     const accessToken = this.tokenGenerator.generateAccessToken({
       id: user.id,
