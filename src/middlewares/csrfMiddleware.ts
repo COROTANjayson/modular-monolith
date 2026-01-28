@@ -3,19 +3,19 @@ import {
   generateCsrfToken,
   signCsrfToken,
   verifyCsrfToken,
-} from "../utils/helpers";
+} from "../shared/utils/helpers";
 import {
   COOKIE_SAME_SITE,
   CSRF_COOKIE_NAME,
   CSRF_SECRET,
-} from "../utils/config";
+} from "../shared/utils/config";
 import { logger } from "../libs/logger";
 
 // ✅ Step 1: Issue token if not exists
 export const csrfTokenMiddleware = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const token = req.cookies[CSRF_COOKIE_NAME];
 
@@ -36,7 +36,7 @@ export const csrfTokenMiddleware = (
 export const verifyCsrfMiddleware = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   // Skip CSRF check for safe methods
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) {

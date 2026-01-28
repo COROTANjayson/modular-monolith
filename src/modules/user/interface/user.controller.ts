@@ -5,6 +5,11 @@
 import { Request, Response } from "express";
 import { UserService } from "../application/user.service";
 import { UpdateUserSchema } from "../application/user.dto";
+import {
+  successResponse,
+  errorResponse,
+} from "../../../shared/utils/response.util";
+import { AppError } from "../../../shared/utils/app-error";
 
 export class UserController {
   constructor(private userService: UserService) {}
@@ -13,12 +18,17 @@ export class UserController {
     try {
       const userId = (req as any).userId;
       const user = await this.userService.getUserById(userId);
-      res.json(user);
+      return successResponse(
+        res,
+        user,
+        200,
+        "User data retrieved successfully",
+      );
     } catch (error: any) {
-      if (error.message === "User not found") {
-        return res.status(404).json({ error: error.message });
+      if (error instanceof AppError) {
+        return errorResponse(res, error.statusCode, error.message);
       }
-      res.status(500).json({ error: "Internal server error" });
+      return errorResponse(res, 500, "Internal server error");
     }
   }
 
@@ -28,16 +38,21 @@ export class UserController {
 
       const validation = UpdateUserSchema.safeParse(req.body);
       if (!validation.success) {
-        return res.status(400).json({ error: validation.error.format() });
+        return errorResponse(
+          res,
+          400,
+          "Validation failed",
+          validation.error.format(),
+        );
       }
 
       const user = await this.userService.updateUser(userId, validation.data);
-      res.json(user);
+      return successResponse(res, user, 200, "User updated successfully");
     } catch (error: any) {
-      if (error.message === "User not found") {
-        return res.status(404).json({ error: error.message });
+      if (error instanceof AppError) {
+        return errorResponse(res, error.statusCode, error.message);
       }
-      res.status(500).json({ error: "Internal server error" });
+      return errorResponse(res, 500, "Internal server error");
     }
   }
 }

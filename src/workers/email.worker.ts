@@ -4,7 +4,7 @@ import { EmailJobData } from "../queues/email.queue";
 import {
   EMAIL_QUEUE_RATE_LIMIT,
   EMAIL_QUEUE_RATE_DURATION,
-} from "../utils/config";
+} from "../shared/utils/config";
 import { logger } from "../libs/logger";
 import { EmailService } from "../shared/utils/email.service";
 

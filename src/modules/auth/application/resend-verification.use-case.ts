@@ -1,5 +1,6 @@
 import { AuthRules } from "../domain/auth-rules";
 import { IAuthUserRepository, ITokenGenerator, IEmailService } from "./ports";
+import { AppError } from "../../../shared/utils/app-error";
 
 export class ResendVerificationUseCase {
   constructor(
@@ -12,11 +13,11 @@ export class ResendVerificationUseCase {
     const user = await this.userRepo.findByEmail(email);
 
     if (!user) {
-      throw new Error("User not found");
+      throw new AppError("User not found", 404);
     }
 
     if (user.isVerified) {
-      throw new Error("Email already verified");
+      throw new AppError("Email already verified", 400);
     }
 
     // Generate new verification token

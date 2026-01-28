@@ -1,12 +1,13 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { ITokenGenerator } from "../application/ports";
+import { AppError } from "../../../shared/utils/app-error";
 import {
   ACCESS_SECRET,
   ACCESS_EXPIRES,
   REFRESH_SECRET,
   REFRESH_EXPIRES,
-} from "../../../utils/config";
+} from "../../../shared/utils/config";
 
 export class JwtTokenGenerator implements ITokenGenerator {
   generateAccessToken(payload: { id: string; email: string }): string {
@@ -34,7 +35,7 @@ export class JwtTokenGenerator implements ITokenGenerator {
         jti: decoded.jti,
       };
     } catch (error) {
-      throw new Error("Invalid token");
+      throw new AppError("Invalid token", 401);
     }
   }
 

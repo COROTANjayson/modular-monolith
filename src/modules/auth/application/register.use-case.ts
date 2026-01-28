@@ -5,6 +5,7 @@ import {
   ITokenGenerator,
   IEmailService,
 } from "./ports";
+import { AppError } from "../../../shared/utils/app-error";
 import { RegisterInput, RegisterOutput } from "./auth.dto";
 
 export class RegisterUseCase {
@@ -18,18 +19,18 @@ export class RegisterUseCase {
   async execute(input: RegisterInput): Promise<RegisterOutput> {
     // Validate using domain rules
     if (!AuthRules.isValidEmail(input.email)) {
-      throw new Error("Invalid email format");
+      throw new AppError("Invalid email format", 400);
     }
 
     const passwordCheck = AuthRules.isValidPassword(input.password);
     if (!passwordCheck.valid) {
-      throw new Error(passwordCheck.reason || "Invalid password");
+      throw new AppError(passwordCheck.reason || "Invalid password", 400);
     }
 
     // Check if user exists
     const existing = await this.authUserRepo.findByEmail(input.email);
     if (existing) {
-      throw new Error("Email already registered");
+      throw new AppError("Email already registered", 409);
     }
 
     // Hash password

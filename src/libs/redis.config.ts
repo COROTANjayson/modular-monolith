@@ -1,5 +1,5 @@
 import Redis from "ioredis";
-import { REDIS_URL } from "../utils/config";
+import { REDIS_URL } from "../shared/utils/config";
 import { logger } from "./logger";
 
 let redis: Redis | null = null;
@@ -15,7 +15,7 @@ export function getRedisClient(): Redis | null {
 
   if (!REDIS_URL) {
     logger.warn(
-      "REDIS_URL not configured. Email queue will not be available. Emails will be sent synchronously."
+      "REDIS_URL not configured. Email queue will not be available. Emails will be sent synchronously.",
     );
     return null;
   }

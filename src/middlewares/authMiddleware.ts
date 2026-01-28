@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { ACCESS_SECRET } from "../utils/config";
+import { ACCESS_SECRET } from "../shared/utils/config";
 
 export function authMiddleware(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith("Bearer "))
