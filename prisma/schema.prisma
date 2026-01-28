@@ -23,4 +23,64 @@ model User {
     isVerified               Boolean   @default(false)
     verificationToken        String?   @unique
     verificationTokenExpires DateTime?
+
+    members OrganizationMember[]
+}
+
+model Organization {
+    id      String @id @default(cuid())
+    name    String
+    slug    String @unique
+    ownerId String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    members     OrganizationMember[]
+    invitations OrganizationInvitation[]
+}
+
+model OrganizationMember {
+    id             String                   @id @default(cuid())
+    organizationId String
+    userId         String
+    role           OrganizationRole
+    status         OrganizationMemberStatus
+
+    invitedAt DateTime  @default(now())
+    joinedAt  DateTime?
+
+    organization Organization @relation(fields: [organizationId], references: [id])
+    user         User         @relation(fields: [userId], references: [id])
+
+    @@unique([organizationId, userId])
+}
+
+model OrganizationInvitation {
+    id             String           @id @default(cuid())
+    organizationId String
+    email          String
+    role           OrganizationRole
+    token          String           @unique
+
+    expiresAt  DateTime
+    acceptedAt DateTime?
+
+    createdAt DateTime @default(now())
+
+    organization Organization @relation(fields: [organizationId], references: [id])
+}
+
+enum OrganizationRole {
+    owner
+    admin
+    editor
+    viewer
+}
+
+enum OrganizationMemberStatus {
+    invited
+    active
+    suspended
+    left
 }

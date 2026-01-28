@@ -3,6 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 import { createAuthModule } from "./modules/auth";
 import { createUserModule } from "./modules/user";
+import { createOrganizationModule } from "./modules/organization";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import {
@@ -49,6 +50,9 @@ app.use("/api/v1/auth", authRouter);
 
 const { router: userRouter } = createUserModule();
 app.use("/api/v1/users", userRouter);
+
+const { router: orgRouter } = createOrganizationModule();
+app.use("/api/v1/organizations", orgRouter);
 
 // Auto-issue CSRF token cookie if missing
 app.use(csrfTokenMiddleware);
