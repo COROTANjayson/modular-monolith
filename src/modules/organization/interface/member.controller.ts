@@ -8,7 +8,7 @@ import {
   successResponse,
   errorResponse,
 } from "../../../shared/utils/response.util";
-import { validation } from "../../../shared/utils/validate";
+import { validate } from "../../../shared/utils/validate";
 import { AppError } from "../../../shared/utils/app-error";
 import {
   inviteUserSchema,
@@ -26,10 +26,9 @@ export class MemberController {
   async invite(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const data = req.body;
-      validation(res, inviteUserSchema as any, data);
+      const validatedData = validate(inviteUserSchema, req.body);
 
-      const invitation = await this.memberService.inviteUser(id, data);
+      const invitation = await this.memberService.inviteUser(id, validatedData);
       return successResponse(
         res,
         invitation,
@@ -39,7 +38,13 @@ export class MemberController {
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message, null, err.code);
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
       }
       return errorResponse(res, 500, "Internal server error", err);
     }
@@ -49,9 +54,9 @@ export class MemberController {
     try {
       const userId = (req as any).userId;
       const { token } = req.params;
-      validation(res, acceptInvitationSchema as any, { token });
+      const validatedData = validate(acceptInvitationSchema, { token });
 
-      await this.memberService.acceptInvitation(token, userId);
+      await this.memberService.acceptInvitation(validatedData.token, userId);
       return successResponse(
         res,
         {},
@@ -61,7 +66,13 @@ export class MemberController {
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message, null, err.code);
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
       }
       return errorResponse(res, 500, "Internal server error", err);
     }
@@ -80,7 +91,13 @@ export class MemberController {
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message, null, err.code);
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
       }
       return errorResponse(res, 500, "Internal server error", err);
     }
@@ -89,13 +106,12 @@ export class MemberController {
   async updateMemberRole(req: Request, res: Response) {
     try {
       const { id, userId } = req.params;
-      const data = req.body;
-      validation(res, updateMemberRoleSchema as any, data);
+      const validatedData = validate(updateMemberRoleSchema, req.body);
 
       const member = await this.memberService.updateMemberRole(
         id,
         userId,
-        data,
+        validatedData,
       );
       return successResponse(
         res,
@@ -106,7 +122,13 @@ export class MemberController {
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message, null, err.code);
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
       }
       return errorResponse(res, 500, "Internal server error", err);
     }
@@ -125,7 +147,13 @@ export class MemberController {
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message, null, err.code);
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
       }
       return errorResponse(res, 500, "Internal server error", err);
     }

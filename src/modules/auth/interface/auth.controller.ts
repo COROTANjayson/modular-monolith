@@ -10,7 +10,7 @@ import {
   successResponse,
 } from "../../../shared/utils/response.util";
 import { AppError } from "../../../shared/utils/app-error";
-import { validation } from "../../../shared/utils/validate";
+import { validate } from "../../../shared/utils/validate";
 import { generateCsrfToken } from "../../../shared/utils/helpers";
 import {
   SUCCESS_CODES,
@@ -56,12 +56,13 @@ export class AuthController {
 
   async register(req: Request, res: Response) {
     try {
-      const payload = req.body;
-      validation(res, registerSchema, payload);
+      const validatedData = validate(registerSchema, req.body);
 
-      const result = await this.registerUseCase.execute(payload);
+      const result = await this.registerUseCase.execute(validatedData);
 
-      logger.info("User registered successfully:", { email: payload.email });
+      logger.info("User registered successfully:", {
+        email: validatedData.email,
+      });
       return successResponse(
         res,
         result,
@@ -75,7 +76,13 @@ export class AuthController {
           error: err.message,
           email: req.body.email,
         });
-        return errorResponse(res, err.statusCode, err.message, null, err.code);
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
       }
       logger.error("Registration error:", {
         error: err.message,
@@ -87,10 +94,9 @@ export class AuthController {
 
   async login(req: Request, res: Response) {
     try {
-      const payload = req.body;
-      validation(res, loginSchema, payload);
+      const validatedData = validate(loginSchema, req.body);
 
-      const tokens = await this.loginUseCase.execute(payload);
+      const tokens = await this.loginUseCase.execute(validatedData);
       const csrfToken = generateCsrfToken();
 
       logger.debug("CSRF token generated for login");
@@ -108,7 +114,9 @@ export class AuthController {
         secure: COOKIE_SECURE,
       });
 
-      logger.info("User logged in successfully:", { email: payload.email });
+      logger.info("User logged in successfully:", {
+        email: validatedData.email,
+      });
 
       return successResponse(
         res,
@@ -123,7 +131,13 @@ export class AuthController {
           error: err.message,
           email: req.body.email,
         });
-        return errorResponse(res, err.statusCode, err.message, null, err.code);
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
       }
       logger.error("Login error:", {
         error: err.message,
@@ -209,10 +223,9 @@ export class AuthController {
 
   async verifyEmail(req: Request, res: Response) {
     try {
-      const { token } = req.body;
-      validation(res, verifyEmailSchema, { token });
+      const validatedData = validate(verifyEmailSchema, req.body);
 
-      const result = await this.verifyEmailUseCase.execute(token);
+      const result = await this.verifyEmailUseCase.execute(validatedData.token);
       logger.info("Email verified successfully");
       return successResponse(
         res,
@@ -227,7 +240,7 @@ export class AuthController {
         res,
         err.statusCode || 500,
         err.message,
-        null,
+        err.errors,
         err.code,
       );
     }
@@ -235,11 +248,12 @@ export class AuthController {
 
   async resendVerification(req: Request, res: Response) {
     try {
-      const { email } = req.body;
-      validation(res, resendVerificationSchema, { email });
+      const validatedData = validate(resendVerificationSchema, req.body);
 
-      const result = await this.resendVerificationUseCase.execute(email);
-      logger.info("Verification email resent:", { email });
+      const result = await this.resendVerificationUseCase.execute(
+        validatedData.email,
+      );
+      logger.info("Verification email resent:", { email: validatedData.email });
       return successResponse(
         res,
         result,
@@ -256,22 +270,20 @@ export class AuthController {
         res,
         err.statusCode || 500,
         err.message,
-        null,
+        err.errors,
         err.code,
       );
     }
   }
   async updatePassword(req: Request, res: Response) {
     try {
-      const payload = req.body;
+      const validatedData = validate(updatePasswordSchema, req.body);
       const userId = (req as any).userId;
-
-      validation(res, updatePasswordSchema, payload);
 
       await this.updatePasswordUseCase.execute({
         userId,
-        oldPassword: payload.oldPassword,
-        newPassword: payload.newPassword,
+        oldPassword: validatedData.oldPassword,
+        newPassword: validatedData.newPassword,
       });
 
       logger.info("Password updated successfully:", { userId });
@@ -288,7 +300,13 @@ export class AuthController {
           error: err.message,
           userId: (req as any).userId,
         });
-        return errorResponse(res, err.statusCode, err.message, null, err.code);
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
       }
       logger.error("Password update error:", {
         error: err.message,

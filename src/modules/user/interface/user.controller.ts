@@ -14,6 +14,7 @@ import {
   SUCCESS_CODES,
   ERROR_CODES,
 } from "../../../shared/utils/response-code";
+import { validate } from "../../../shared/utils/validate";
 
 export class UserController {
   constructor(private userService: UserService) {}
@@ -35,7 +36,7 @@ export class UserController {
           res,
           error.statusCode,
           error.message,
-          null,
+          error.errors,
           error.code,
         );
       }
@@ -46,19 +47,9 @@ export class UserController {
   async updateMe(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
+      const validatedData = validate(UpdateUserSchema, req.body);
 
-      const validation = UpdateUserSchema.safeParse(req.body);
-      if (!validation.success) {
-        return errorResponse(
-          res,
-          400,
-          "Validation failed",
-          validation.error.format(),
-          ERROR_CODES.VALIDATION_ERROR,
-        );
-      }
-
-      const user = await this.userService.updateUser(userId, validation.data);
+      const user = await this.userService.updateUser(userId, validatedData);
       return successResponse(
         res,
         user,
@@ -72,7 +63,7 @@ export class UserController {
           res,
           error.statusCode,
           error.message,
-          null,
+          error.errors,
           error.code,
         );
       }

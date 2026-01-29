@@ -8,7 +8,7 @@ import {
   successResponse,
   errorResponse,
 } from "../../../shared/utils/response.util";
-import { validation } from "../../../shared/utils/validate";
+import { validate } from "../../../shared/utils/validate";
 import { AppError } from "../../../shared/utils/app-error";
 import {
   createOrganizationSchema,
@@ -25,12 +25,11 @@ export class OrganizationController {
   async create(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
-      const data = req.body;
-      validation(res, createOrganizationSchema as any, data);
+      const validatedData = validate(createOrganizationSchema, req.body);
 
       const organization = await this.organizationService.createOrganization(
         userId,
-        data,
+        validatedData,
       );
       return successResponse(
         res,
@@ -41,7 +40,13 @@ export class OrganizationController {
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message, null, err.code);
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
       }
       return errorResponse(res, 500, "Internal server error", err);
     }
@@ -50,12 +55,11 @@ export class OrganizationController {
   async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const data = req.body;
-      validation(res, updateOrganizationSchema as any, data);
+      const validatedData = validate(updateOrganizationSchema, req.body);
 
       const organization = await this.organizationService.updateOrganization(
         id,
-        data,
+        validatedData,
       );
       return successResponse(
         res,
@@ -66,7 +70,13 @@ export class OrganizationController {
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message, null, err.code);
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
       }
       return errorResponse(res, 500, "Internal server error", err);
     }
