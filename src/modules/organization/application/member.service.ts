@@ -3,6 +3,7 @@
  */
 
 import { IOrganizationRepository } from "../domain/ports";
+import { IUserRepository } from "../../user/application/ports";
 import { InviteUserDto, UpdateMemberRoleDto } from "./organization.dto";
 import {
   OrganizationMember,
@@ -15,7 +16,10 @@ import { ERROR_CODES } from "../../../shared/utils/response-code";
 import { v4 as uuidv4 } from "uuid";
 
 export class MemberService {
-  constructor(private organizationRepository: IOrganizationRepository) {}
+  constructor(
+    private organizationRepository: IOrganizationRepository,
+    private userRepository: IUserRepository,
+  ) {}
 
   async inviteUser(
     organizationId: string,
@@ -61,6 +65,15 @@ export class MemberService {
     if (invitation.inviterId === userId) {
       throw new AppError(
         "You cannot accept an invitation you sent yourself",
+        400,
+        ERROR_CODES.ORG_INVITATION_INVALID,
+      );
+    }
+
+    const user = await this.userRepository.findById(userId);
+    if (!user || user.email !== invitation.email) {
+      throw new AppError(
+        "This invitation was sent to a different email address",
         400,
         ERROR_CODES.ORG_INVITATION_INVALID,
       );
