@@ -23,6 +23,22 @@ export class PrismaUserRepository implements IUserRepository {
     return user as User | null;
   }
 
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        age: true,
+        gender: true,
+      },
+    });
+
+    return user as User | null;
+  }
+
   async update(id: string, data: UserUpdateData): Promise<User> {
     const user = await prisma.user.update({
       where: { id },

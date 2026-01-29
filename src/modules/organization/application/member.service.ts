@@ -36,6 +36,29 @@ export class MemberService {
       );
     }
 
+    if (data.role === OrganizationRole.OWNER) {
+      throw new AppError(
+        "An organization can only have one owner",
+        400,
+        ERROR_CODES.BAD_REQUEST,
+      );
+    }
+
+    const userToInvite = await this.userRepository.findByEmail(data.email);
+    if (userToInvite) {
+      const existingMember = await this.organizationRepository.findMember(
+        organizationId,
+        userToInvite.id,
+      );
+      if (existingMember) {
+        throw new AppError(
+          "User is already a member of this organization",
+          400,
+          ERROR_CODES.ORG_ALREADY_MEMBER,
+        );
+      }
+    }
+
     const token = uuidv4();
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
@@ -137,6 +160,15 @@ export class MemberService {
 
     if (member.role === OrganizationRole.OWNER) {
       throw new AppError("Cannot change role of organization owner", 400);
+    }
+
+    // Rule: only one owner (cannot update someone to owner)
+    if (data.role === OrganizationRole.OWNER) {
+      throw new AppError(
+        "An organization can only have one owner",
+        400,
+        ERROR_CODES.BAD_REQUEST,
+      );
     }
 
     return this.organizationRepository.updateMember(organizationId, userId, {
