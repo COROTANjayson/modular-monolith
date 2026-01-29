@@ -41,6 +41,7 @@ export interface IOrganizationRepository {
   // Invitations
   createInvitation(data: {
     organizationId: string;
+    inviterId: string;
     email: string;
     role: OrganizationRole;
     token: string;

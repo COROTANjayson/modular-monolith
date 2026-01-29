@@ -27,8 +27,13 @@ export class MemberController {
     try {
       const { id } = req.params;
       const validatedData = validate(inviteUserSchema, req.body);
+      const userId = (req as any).userId;
 
-      const invitation = await this.memberService.inviteUser(id, validatedData);
+      const invitation = await this.memberService.inviteUser(
+        id,
+        validatedData,
+        userId,
+      );
       return successResponse(
         res,
         invitation,

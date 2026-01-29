@@ -16,11 +16,11 @@ export function createOrganizationRouter(
   // All organization routes require authentication
   router.use(authMiddleware);
 
-  // --- Organization Management ---
+  //  Organization Management
   router.post("/", (req, res) => orgController.create(req, res));
   router.patch("/:id", (req, res) => orgController.update(req, res));
 
-  // --- Member & Invitation Management ---
+  //  Member & Invitation Management
   router.post("/:id/invitations", (req, res) =>
     memberController.invite(req, res),
   );

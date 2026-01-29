@@ -5,8 +5,7 @@
 export enum OrganizationRole {
   OWNER = "owner",
   ADMIN = "admin",
-  EDITOR = "editor",
-  VIEWER = "viewer",
+  MEMBER = "member",
 }
 
 export enum OrganizationMemberStatus {
@@ -38,6 +37,7 @@ export interface OrganizationMember {
 export interface OrganizationInvitation {
   id: string;
   organizationId: string;
+  inviterId: string;
   email: string;
   role: OrganizationRole;
   token: string;

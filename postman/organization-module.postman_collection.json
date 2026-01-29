@@ -133,7 +133,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"invitee@example.com\",\n    \"role\": \"editor\"\n}"
+              "raw": "{\n    \"email\": \"invitee@example.com\",\n    \"role\": \"member\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/organizations/:orgId/invitations",
@@ -155,7 +155,7 @@
                 "header": [],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n    \"email\": \"invitee@example.com\",\n    \"role\": \"editor\"\n}"
+                  "raw": "{\n    \"email\": \"invitee@example.com\",\n    \"role\": \"member\"\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/organizations/:orgId/invitations",
@@ -174,7 +174,7 @@
               "_postman_previewlanguage": "json",
               "header": [],
               "cookie": [],
-              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS_CREATED\",\n    \"message\": \"Invitation sent successfully\",\n    \"data\": {\n        \"id\": \"inv_456\",\n        \"email\": \"invitee@example.com\",\n        \"role\": \"editor\",\n        \"token\": \"abc-123-token\"\n    }\n}"
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS_CREATED\",\n    \"message\": \"Invitation sent successfully\",\n    \"data\": {\n        \"id\": \"inv_456\",\n        \"email\": \"invitee@example.com\",\n        \"role\": \"member\",\n        \"token\": \"abc-123-token\"\n    }\n}"
             }
           ]
         },

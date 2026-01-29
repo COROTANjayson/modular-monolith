@@ -111,6 +111,7 @@ export class PrismaOrganizationRepository implements IOrganizationRepository {
 
   async createInvitation(data: {
     organizationId: string;
+    inviterId: string;
     email: string;
     role: OrganizationRole;
     token: string;
@@ -119,6 +120,7 @@ export class PrismaOrganizationRepository implements IOrganizationRepository {
     return (await prisma.organizationInvitation.create({
       data: {
         organizationId: data.organizationId,
+        inviterId: data.inviterId,
         email: data.email,
         role: data.role as any,
         token: data.token,

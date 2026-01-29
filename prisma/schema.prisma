@@ -24,7 +24,7 @@ model User {
     verificationToken        String?   @unique
     verificationTokenExpires DateTime?
 
-    members OrganizationMember[]
+    organizationMembers OrganizationMember[]
 }
 
 model Organization {
@@ -59,6 +59,7 @@ model OrganizationMember {
 model OrganizationInvitation {
     id             String           @id @default(cuid())
     organizationId String
+    inviterId      String
     email          String
     role           OrganizationRole
     token          String           @unique
@@ -74,8 +75,7 @@ model OrganizationInvitation {
 enum OrganizationRole {
     owner
     admin
-    editor
-    viewer
+    member
 }
 
 enum OrganizationMemberStatus {

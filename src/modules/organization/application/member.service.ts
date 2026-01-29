@@ -20,6 +20,7 @@ export class MemberService {
   async inviteUser(
     organizationId: string,
     data: InviteUserDto,
+    inviterId: string,
   ): Promise<OrganizationInvitation> {
     const organization =
       await this.organizationRepository.findById(organizationId);
@@ -37,6 +38,7 @@ export class MemberService {
 
     return this.organizationRepository.createInvitation({
       organizationId,
+      inviterId,
       email: data.email,
       role: data.role,
       token,
@@ -51,6 +53,14 @@ export class MemberService {
     if (!invitation) {
       throw new AppError(
         "Invalid or expired invitation token",
+        400,
+        ERROR_CODES.ORG_INVITATION_INVALID,
+      );
+    }
+
+    if (invitation.inviterId === userId) {
+      throw new AppError(
+        "You cannot accept an invitation you sent yourself",
         400,
         ERROR_CODES.ORG_INVITATION_INVALID,
       );
