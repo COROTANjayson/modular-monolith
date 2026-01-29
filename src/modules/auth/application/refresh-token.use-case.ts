@@ -2,6 +2,7 @@ import { AuthRules } from "../domain/auth-rules";
 import { IAuthUserRepository, ITokenGenerator } from "./ports";
 import { AuthTokens } from "./auth.dto";
 import { AppError } from "../../../shared/utils/app-error";
+import { ERROR_CODES } from "../../../shared/utils/response-code";
 
 export class RefreshTokenUseCase {
   constructor(
@@ -15,18 +16,30 @@ export class RefreshTokenUseCase {
     try {
       tokenData = this.tokenGenerator.verifyRefreshToken(refreshToken);
     } catch (error) {
-      throw new AppError("Invalid refresh token", 401);
+      throw new AppError(
+        "Invalid refresh token",
+        401,
+        ERROR_CODES.AUTH_INVALID_TOKEN,
+      );
     }
 
     // Find user
     const user = await this.userRepo.findById(tokenData.id);
     if (!user) {
-      throw new AppError("Invalid token (user not found)", 401);
+      throw new AppError(
+        "Invalid token (user not found)",
+        401,
+        ERROR_CODES.AUTH_UNAUTHORIZED,
+      );
     }
 
     // Check token validity using domain rules
     if (!AuthRules.isRefreshTokenValid(tokenData.jti, user.currentTokenId)) {
-      throw new AppError("Refresh token revoked or already used", 401);
+      throw new AppError(
+        "Refresh token revoked or already used",
+        401,
+        ERROR_CODES.AUTH_TOKEN_EXPIRED,
+      );
     }
 
     // Generate new session

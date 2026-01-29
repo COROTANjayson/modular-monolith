@@ -15,6 +15,10 @@ import {
   acceptInvitationSchema,
   updateMemberRoleSchema,
 } from "./validation";
+import {
+  SUCCESS_CODES,
+  ERROR_CODES,
+} from "../../../shared/utils/response-code";
 
 export class MemberController {
   constructor(private memberService: MemberService) {}
@@ -31,10 +35,11 @@ export class MemberController {
         invitation,
         201,
         "Invitation sent successfully",
+        SUCCESS_CODES.ORG_INVITATION_SENT,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message);
+        return errorResponse(res, err.statusCode, err.message, null, err.code);
       }
       return errorResponse(res, 500, "Internal server error", err);
     }
@@ -47,10 +52,16 @@ export class MemberController {
       validation(res, acceptInvitationSchema as any, { token });
 
       await this.memberService.acceptInvitation(token, userId);
-      return successResponse(res, {}, 200, "Invitation accepted successfully");
+      return successResponse(
+        res,
+        {},
+        200,
+        "Invitation accepted successfully",
+        SUCCESS_CODES.ORG_INVITATION_ACCEPTED,
+      );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message);
+        return errorResponse(res, err.statusCode, err.message, null, err.code);
       }
       return errorResponse(res, 500, "Internal server error", err);
     }
@@ -65,10 +76,11 @@ export class MemberController {
         members,
         200,
         "Members retrieved successfully",
+        SUCCESS_CODES.FETCHED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message);
+        return errorResponse(res, err.statusCode, err.message, null, err.code);
       }
       return errorResponse(res, 500, "Internal server error", err);
     }
@@ -90,10 +102,11 @@ export class MemberController {
         member,
         200,
         "Member role updated successfully",
+        SUCCESS_CODES.ORG_MEMBER_ROLE_UPDATED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message);
+        return errorResponse(res, err.statusCode, err.message, null, err.code);
       }
       return errorResponse(res, 500, "Internal server error", err);
     }
@@ -103,10 +116,16 @@ export class MemberController {
     try {
       const { id, userId } = req.params;
       await this.memberService.removeMember(id, userId);
-      return successResponse(res, {}, 200, "Member removed successfully");
+      return successResponse(
+        res,
+        {},
+        200,
+        "Member removed successfully",
+        SUCCESS_CODES.ORG_MEMBER_REMOVED,
+      );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message);
+        return errorResponse(res, err.statusCode, err.message, null, err.code);
       }
       return errorResponse(res, 500, "Internal server error", err);
     }

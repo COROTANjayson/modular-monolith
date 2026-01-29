@@ -14,6 +14,10 @@ import {
   createOrganizationSchema,
   updateOrganizationSchema,
 } from "./validation";
+import {
+  SUCCESS_CODES,
+  ERROR_CODES,
+} from "../../../shared/utils/response-code";
 
 export class OrganizationController {
   constructor(private organizationService: OrganizationService) {}
@@ -33,10 +37,11 @@ export class OrganizationController {
         organization,
         201,
         "Organization created successfully",
+        SUCCESS_CODES.ORG_CREATED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message);
+        return errorResponse(res, err.statusCode, err.message, null, err.code);
       }
       return errorResponse(res, 500, "Internal server error", err);
     }
@@ -57,10 +62,11 @@ export class OrganizationController {
         organization,
         200,
         "Organization updated successfully",
+        SUCCESS_CODES.ORG_UPDATED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
-        return errorResponse(res, err.statusCode, err.message);
+        return errorResponse(res, err.statusCode, err.message, null, err.code);
       }
       return errorResponse(res, 500, "Internal server error", err);
     }

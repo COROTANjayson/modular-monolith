@@ -33,7 +33,52 @@
               "path": ["organizations"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"My New Organization\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/organizations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["organizations"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS_CREATED\",\n    \"message\": \"Organization created successfully\",\n    \"data\": {\n        \"id\": \"org_123\",\n        \"name\": \"My New Organization\",\n        \"slug\": \"my-new-organization\",\n        \"createdAt\": \"2024-01-29T12:00:00.000Z\"\n    }\n}"
+            },
+            {
+              "name": "Validation Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/organizations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["organizations"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"code\": \"ERROR_VALIDATION_ERROR\",\n    \"message\": \"Validation error\",\n    \"errors\": [\n        {\n            \"field\": \"name\",\n            \"message\": \"Name is too short\"\n        }\n    ]\n}"
+            }
+          ]
         },
         {
           "name": "Update Organization",
@@ -102,7 +147,36 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"invitee@example.com\",\n    \"role\": \"editor\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/organizations/:orgId/invitations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["organizations", ":orgId", "invitations"],
+                  "variable": [
+                    {
+                      "key": "orgId",
+                      "value": "org_123"
+                    }
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"code\": \"SUCCESS_CREATED\",\n    \"message\": \"Invitation sent successfully\",\n    \"data\": {\n        \"id\": \"inv_456\",\n        \"email\": \"invitee@example.com\",\n        \"role\": \"editor\",\n        \"token\": \"abc-123-token\"\n    }\n}"
+            }
+          ]
         },
         {
           "name": "Accept Invitation",

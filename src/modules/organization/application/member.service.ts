@@ -11,6 +11,7 @@ import {
   OrganizationMemberStatus,
 } from "../domain/organization.entity";
 import { AppError } from "../../../shared/utils/app-error";
+import { ERROR_CODES } from "../../../shared/utils/response-code";
 import { v4 as uuidv4 } from "uuid";
 
 export class MemberService {
@@ -23,7 +24,11 @@ export class MemberService {
     const organization =
       await this.organizationRepository.findById(organizationId);
     if (!organization) {
-      throw new AppError("Organization not found", 404);
+      throw new AppError(
+        "Organization not found",
+        404,
+        ERROR_CODES.ORG_NOT_FOUND,
+      );
     }
 
     const token = uuidv4();
@@ -44,15 +49,27 @@ export class MemberService {
       await this.organizationRepository.findInvitationByToken(token);
 
     if (!invitation) {
-      throw new AppError("Invalid or expired invitation token", 400);
+      throw new AppError(
+        "Invalid or expired invitation token",
+        400,
+        ERROR_CODES.ORG_INVITATION_INVALID,
+      );
     }
 
     if (invitation.acceptedAt) {
-      throw new AppError("Invitation already accepted", 400);
+      throw new AppError(
+        "Invitation already accepted",
+        400,
+        ERROR_CODES.ORG_ALREADY_MEMBER,
+      );
     }
 
     if (invitation.expiresAt < new Date()) {
-      throw new AppError("Invitation expired", 400);
+      throw new AppError(
+        "Invitation expired",
+        400,
+        ERROR_CODES.ORG_INVITATION_EXPIRED,
+      );
     }
 
     // Mark invitation as accepted
@@ -73,7 +90,11 @@ export class MemberService {
     const organization =
       await this.organizationRepository.findById(organizationId);
     if (!organization) {
-      throw new AppError("Organization not found", 404);
+      throw new AppError(
+        "Organization not found",
+        404,
+        ERROR_CODES.ORG_NOT_FOUND,
+      );
     }
     return this.organizationRepository.listMembers(organizationId);
   }
@@ -88,7 +109,7 @@ export class MemberService {
       userId,
     );
     if (!member) {
-      throw new AppError("Member not found", 404);
+      throw new AppError("Member not found", 404, ERROR_CODES.NOT_FOUND);
     }
 
     if (member.role === OrganizationRole.OWNER) {
@@ -106,7 +127,7 @@ export class MemberService {
       userId,
     );
     if (!member) {
-      throw new AppError("Member not found", 404);
+      throw new AppError("Member not found", 404, ERROR_CODES.NOT_FOUND);
     }
 
     if (member.role === OrganizationRole.OWNER) {

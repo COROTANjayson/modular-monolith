@@ -2,6 +2,7 @@ import { AuthRules } from "../domain/auth-rules";
 import { IAuthUserRepository, IPasswordHasher } from "./ports";
 import { UpdatePasswordInput } from "./auth.dto";
 import { AppError } from "../../../shared/utils/app-error";
+import { ERROR_CODES } from "../../../shared/utils/response-code";
 
 export class UpdatePasswordUseCase {
   constructor(
@@ -13,7 +14,11 @@ export class UpdatePasswordUseCase {
     // Find user
     const user = await this.userRepo.findById(input.userId);
     if (!user) {
-      throw new AppError("User not found", 404);
+      throw new AppError(
+        "User not found",
+        404,
+        ERROR_CODES.AUTH_USER_NOT_FOUND,
+      );
     }
 
     // Verify old password if provided
@@ -22,6 +27,7 @@ export class UpdatePasswordUseCase {
         throw new AppError(
           "New password cannot be the same as the old password",
           400,
+          ERROR_CODES.BAD_REQUEST,
         );
       }
 
@@ -30,7 +36,11 @@ export class UpdatePasswordUseCase {
         user.password,
       );
       if (!isPasswordValid) {
-        throw new AppError("Invalid old password", 401);
+        throw new AppError(
+          "Invalid old password",
+          401,
+          ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+        );
       }
     }
 
@@ -40,6 +50,7 @@ export class UpdatePasswordUseCase {
       throw new AppError(
         passwordValidation.reason || "Invalid new password",
         400,
+        ERROR_CODES.AUTH_INVALID_PASSWORD,
       );
     }
 

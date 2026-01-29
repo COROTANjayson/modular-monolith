@@ -13,6 +13,7 @@ import {
   OrganizationMemberStatus,
 } from "../domain/organization.entity";
 import { AppError } from "../../../shared/utils/app-error";
+import { ERROR_CODES } from "../../../shared/utils/response-code";
 
 export class OrganizationService {
   constructor(private organizationRepository: IOrganizationRepository) {}
@@ -42,7 +43,11 @@ export class OrganizationService {
   async getOrganization(id: string): Promise<Organization> {
     const organization = await this.organizationRepository.findById(id);
     if (!organization) {
-      throw new AppError("Organization not found", 404);
+      throw new AppError(
+        "Organization not found",
+        404,
+        ERROR_CODES.ORG_NOT_FOUND,
+      );
     }
     return organization;
   }
