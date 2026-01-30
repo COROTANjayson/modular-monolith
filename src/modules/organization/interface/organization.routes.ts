@@ -17,7 +17,9 @@ export function createOrganizationRouter(
   router.use(authMiddleware);
 
   //  Organization Management
+  router.get("/", (req, res) => orgController.getAll(req, res));
   router.post("/", (req, res) => orgController.create(req, res));
+  router.get("/:id", (req, res) => orgController.getById(req, res));
   router.patch("/:id", (req, res) => orgController.update(req, res));
 
   //  Member & Invitation Management

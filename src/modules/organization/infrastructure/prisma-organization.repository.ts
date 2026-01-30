@@ -34,6 +34,18 @@ export class PrismaOrganizationRepository implements IOrganizationRepository {
     })) as unknown as Organization | null;
   }
 
+  async findAllByUserId(userId: string): Promise<Organization[]> {
+    return (await prisma.organization.findMany({
+      where: {
+        members: {
+          some: {
+            userId,
+          },
+        },
+      },
+    })) as unknown as Organization[];
+  }
+
   async update(id: string, data: Partial<Organization>): Promise<Organization> {
     return (await prisma.organization.update({
       where: { id },
@@ -74,6 +86,16 @@ export class PrismaOrganizationRepository implements IOrganizationRepository {
   async listMembers(organizationId: string): Promise<OrganizationMember[]> {
     return (await prisma.organizationMember.findMany({
       where: { organizationId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
     })) as unknown as OrganizationMember[];
   }
 

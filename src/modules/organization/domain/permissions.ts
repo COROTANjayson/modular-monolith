@@ -14,8 +14,6 @@ export enum OrganizationPermission {
   MEMBER_REMOVE = "member:remove",
 }
 
-// Static mapping of roles to permissions
-// This can be moved to the database in the future
 const ROLE_PERMISSIONS: Record<OrganizationRole, OrganizationPermission[]> = {
   [OrganizationRole.OWNER]: [
     OrganizationPermission.ORG_READ,

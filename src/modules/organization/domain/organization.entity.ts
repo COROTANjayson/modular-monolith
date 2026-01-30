@@ -32,6 +32,12 @@ export interface OrganizationMember {
   status: OrganizationMemberStatus;
   invitedAt: Date;
   joinedAt: Date | null;
+  user?: {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    email: string;
+  };
 }
 
 export interface OrganizationInvitation {

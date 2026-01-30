@@ -83,6 +83,10 @@ export class OrganizationService {
     return organization;
   }
 
+  async getUserOrganizations(userId: string): Promise<Organization[]> {
+    return this.organizationRepository.findAllByUserId(userId);
+  }
+
   async updateOrganization(
     id: string,
     data: UpdateOrganizationDto,

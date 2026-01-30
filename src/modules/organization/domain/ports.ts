@@ -17,6 +17,7 @@ export interface IOrganizationRepository {
   }): Promise<Organization>;
   findById(id: string): Promise<Organization | null>;
   findBySlug(slug: string): Promise<Organization | null>;
+  findAllByUserId(userId: string): Promise<Organization[]>;
   update(id: string, data: Partial<Organization>): Promise<Organization>;
 
   // Members
