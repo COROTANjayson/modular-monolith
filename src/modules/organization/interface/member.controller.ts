@@ -86,7 +86,8 @@ export class MemberController {
   async listMembers(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const members = await this.memberService.listMembers(id);
+      const userId = (req as any).userId;
+      const members = await this.memberService.listMembers(id, userId);
       return successResponse(
         res,
         members,
@@ -112,11 +113,13 @@ export class MemberController {
     try {
       const { id, userId } = req.params;
       const validatedData = validate(updateMemberRoleSchema, req.body);
+      const currentUserId = (req as any).userId;
 
       const member = await this.memberService.updateMemberRole(
         id,
         userId,
         validatedData,
+        currentUserId,
       );
       return successResponse(
         res,
@@ -142,7 +145,8 @@ export class MemberController {
   async removeMember(req: Request, res: Response) {
     try {
       const { id, userId } = req.params;
-      await this.memberService.removeMember(id, userId);
+      const currentUserId = (req as any).userId;
+      await this.memberService.removeMember(id, userId, currentUserId);
       return successResponse(
         res,
         {},

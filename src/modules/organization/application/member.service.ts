@@ -11,6 +11,7 @@ import {
   OrganizationRole,
   OrganizationMemberStatus,
 } from "../domain/organization.entity";
+import { OrganizationPermission, hasPermission } from "../domain/permissions";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
 import { v4 as uuidv4 } from "uuid";
@@ -21,11 +22,45 @@ export class MemberService {
     private userRepository: IUserRepository,
   ) {}
 
+  private async ensureHasPermission(
+    organizationId: string,
+    userId: string,
+    permission: OrganizationPermission,
+  ): Promise<OrganizationRole> {
+    const member = await this.organizationRepository.findMember(
+      organizationId,
+      userId,
+    );
+    if (!member) {
+      throw new AppError(
+        "You are not a member of this organization",
+        403,
+        ERROR_CODES.FORBIDDEN,
+      );
+    }
+
+    if (!hasPermission(member.role, permission)) {
+      throw new AppError(
+        "You do not have permission to perform this action",
+        403,
+        ERROR_CODES.FORBIDDEN,
+      );
+    }
+
+    return member.role;
+  }
+
   async inviteUser(
     organizationId: string,
     data: InviteUserDto,
     inviterId: string,
   ): Promise<OrganizationInvitation> {
+    await this.ensureHasPermission(
+      organizationId,
+      inviterId,
+      OrganizationPermission.MEMBER_INVITE,
+    );
+
     const organization =
       await this.organizationRepository.findById(organizationId);
     if (!organization) {
@@ -132,37 +167,57 @@ export class MemberService {
     });
   }
 
-  async listMembers(organizationId: string): Promise<OrganizationMember[]> {
-    const organization =
-      await this.organizationRepository.findById(organizationId);
-    if (!organization) {
-      throw new AppError(
-        "Organization not found",
-        404,
-        ERROR_CODES.ORG_NOT_FOUND,
-      );
-    }
+  async listMembers(
+    organizationId: string,
+    userId: string,
+  ): Promise<OrganizationMember[]> {
+    await this.ensureHasPermission(
+      organizationId,
+      userId,
+      OrganizationPermission.MEMBER_LIST,
+    );
     return this.organizationRepository.listMembers(organizationId);
   }
 
   async updateMemberRole(
     organizationId: string,
-    userId: string,
+    targetUserId: string,
     data: UpdateMemberRoleDto,
+    currentUserId: string,
   ): Promise<OrganizationMember> {
-    const member = await this.organizationRepository.findMember(
+    const currentUserRole = await this.ensureHasPermission(
       organizationId,
-      userId,
+      currentUserId,
+      OrganizationPermission.MEMBER_UPDATE_ROLE,
     );
-    if (!member) {
+
+    const targetMember = await this.organizationRepository.findMember(
+      organizationId,
+      targetUserId,
+    );
+    if (!targetMember) {
       throw new AppError("Member not found", 404, ERROR_CODES.NOT_FOUND);
     }
 
-    if (member.role === OrganizationRole.OWNER) {
+    // Protection logic for Owner remains as business rules
+    if (
+      targetMember.role === OrganizationRole.OWNER &&
+      currentUserRole === OrganizationRole.ADMIN
+    ) {
+      throw new AppError(
+        "Only organization owners can modify their own role",
+        403,
+        ERROR_CODES.FORBIDDEN,
+      );
+    }
+
+    if (
+      targetMember.role === OrganizationRole.OWNER &&
+      targetUserId !== currentUserId
+    ) {
       throw new AppError("Cannot change role of organization owner", 400);
     }
 
-    // Rule: only one owner (cannot update someone to owner)
     if (data.role === OrganizationRole.OWNER) {
       throw new AppError(
         "An organization can only have one owner",
@@ -171,24 +226,57 @@ export class MemberService {
       );
     }
 
-    return this.organizationRepository.updateMember(organizationId, userId, {
-      role: data.role,
-    });
+    return this.organizationRepository.updateMember(
+      organizationId,
+      targetUserId,
+      {
+        role: data.role,
+      },
+    );
   }
 
-  async removeMember(organizationId: string, userId: string): Promise<void> {
-    const member = await this.organizationRepository.findMember(
+  async removeMember(
+    organizationId: string,
+    targetUserId: string,
+    currentUserId: string,
+  ): Promise<void> {
+    const currentUserRole = await this.ensureHasPermission(
       organizationId,
-      userId,
+      currentUserId,
+      OrganizationPermission.MEMBER_REMOVE,
     );
-    if (!member) {
+
+    const targetMember = await this.organizationRepository.findMember(
+      organizationId,
+      targetUserId,
+    );
+    if (!targetMember) {
       throw new AppError("Member not found", 404, ERROR_CODES.NOT_FOUND);
     }
 
-    if (member.role === OrganizationRole.OWNER) {
-      throw new AppError("Cannot remove organization owner", 400);
+    // Protection logic for Owner
+    if (
+      targetMember.role === OrganizationRole.OWNER &&
+      currentUserRole !== OrganizationRole.OWNER
+    ) {
+      throw new AppError(
+        "Only owners can remove other owners (if multiple existed), and the primary owner cannot be removed.",
+        403,
+        ERROR_CODES.FORBIDDEN,
+      );
     }
 
-    await this.organizationRepository.removeMember(organizationId, userId);
+    if (targetMember.role === OrganizationRole.OWNER) {
+      throw new AppError(
+        "The organization owner cannot be removed",
+        400,
+        ERROR_CODES.BAD_REQUEST,
+      );
+    }
+
+    await this.organizationRepository.removeMember(
+      organizationId,
+      targetUserId,
+    );
   }
 }

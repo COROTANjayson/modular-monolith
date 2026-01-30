@@ -56,10 +56,12 @@ export class OrganizationController {
     try {
       const { id } = req.params;
       const validatedData = validate(updateOrganizationSchema, req.body);
+      const userId = (req as any).userId;
 
       const organization = await this.organizationService.updateOrganization(
         id,
         validatedData,
+        userId,
       );
       return successResponse(
         res,
