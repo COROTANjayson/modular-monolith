@@ -180,6 +180,21 @@ export class AuthController {
         SUCCESS_CODES.AUTH_TOKEN_REFRESH_SUCCESS,
       );
     } catch (err: any) {
+      // Clear cookies on any refresh error to prevent stuck sessions
+      res.clearCookie(REFRESH_COOKIE_NAME, {
+        httpOnly: true,
+        secure: COOKIE_SECURE,
+        domain: COOKIE_DOMAIN,
+        sameSite: COOKIE_SAME_SITE,
+        maxAge: 0,
+      });
+      res.clearCookie(CSRF_COOKIE_NAME, {
+        httpOnly: false,
+        secure: COOKIE_SECURE,
+        sameSite: COOKIE_SAME_SITE,
+        maxAge: 0,
+      });
+
       if (err instanceof AppError) {
         logger.error("Token refresh failed:", { error: err.message });
         return errorResponse(res, err.statusCode, err.message, null, err.code);
@@ -191,18 +206,26 @@ export class AuthController {
 
   async logout(req: Request, res: Response) {
     try {
-      const { refreshToken } = req.body;
-      if (!refreshToken) {
-        return errorResponse(
-          res,
-          400,
-          "refreshToken required",
-          null,
-          ERROR_CODES.AUTH_INVALID_TOKEN,
-        );
+      const refreshToken = req.cookies[REFRESH_COOKIE_NAME];
+      if (refreshToken) {
+        await this.logoutUseCase.execute(refreshToken);
       }
 
-      await this.logoutUseCase.execute(refreshToken);
+      res.clearCookie(REFRESH_COOKIE_NAME, {
+        httpOnly: true,
+        secure: COOKIE_SECURE,
+        domain: COOKIE_DOMAIN,
+        sameSite: COOKIE_SAME_SITE,
+        maxAge: 0,
+      });
+
+      res.clearCookie(CSRF_COOKIE_NAME, {
+        httpOnly: false,
+        secure: COOKIE_SECURE,
+        sameSite: COOKIE_SAME_SITE,
+        maxAge: 0,
+      });
+
       logger.info("User logged out successfully");
       return successResponse(
         res,
