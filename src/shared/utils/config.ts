@@ -25,7 +25,7 @@ export const CSRF_SECRET = process.env.CSRF_SECRET || "csrf-secret-key";
 export const RESEND_API_KEY = process.env.RESEND_API_KEY;
 export const RESEND_SENDER_EMAIL = process.env.RESEND_SENDER_EMAIL;
 
-export const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+export const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3001";
 
 // Email Queue Configuration (for Resend free tier: 100 emails/day, so ~4 per hour is safe)
 export const EMAIL_QUEUE_RATE_LIMIT = process.env.EMAIL_QUEUE_RATE_LIMIT

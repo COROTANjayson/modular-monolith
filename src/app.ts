@@ -11,11 +11,17 @@ import {
   verifyCsrfMiddleware,
 } from "./middlewares/csrfMiddleware";
 import { logger } from "./libs/logger";
+import { CLIENT_URL } from "./shared/utils/config";
 // import csrf from 'csurf';
 // https://chatgpt.com/c/68eb9870-0f28-8321-89fb-b3f88308208d <- csrf
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: CLIENT_URL|| "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 app.use(express.json());
 
