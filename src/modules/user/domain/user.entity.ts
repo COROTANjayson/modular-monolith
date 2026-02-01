@@ -9,6 +9,8 @@ export interface User {
   lastName: string | null;
   age: number | null;
   gender: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface UserUpdateData {

@@ -17,6 +17,8 @@ export class PrismaUserRepository implements IUserRepository {
         lastName: true,
         age: true,
         gender: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
@@ -33,6 +35,8 @@ export class PrismaUserRepository implements IUserRepository {
         lastName: true,
         age: true,
         gender: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
