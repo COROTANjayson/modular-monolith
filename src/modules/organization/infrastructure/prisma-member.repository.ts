@@ -141,4 +141,10 @@ export class PrismaMemberRepository implements IMemberRepository {
       },
     })) as unknown as OrganizationInvitation[];
   }
+
+  async deleteInvitation(id: string): Promise<void> {
+    await prisma.organizationInvitation.delete({
+      where: { id },
+    });
+  }
 }

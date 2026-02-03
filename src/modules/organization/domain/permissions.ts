@@ -10,6 +10,7 @@ export enum OrganizationPermission {
 
   MEMBER_LIST = "member:list",
   MEMBER_INVITE = "member:invite",
+  MEMBER_INVITE_REVOKE = "member:invite-revoke",
   MEMBER_UPDATE_ROLE = "member:update-role",
   MEMBER_REMOVE = "member:remove",
 }
@@ -21,6 +22,7 @@ const ROLE_PERMISSIONS: Record<OrganizationRole, OrganizationPermission[]> = {
     OrganizationPermission.ORG_DELETE,
     OrganizationPermission.MEMBER_LIST,
     OrganizationPermission.MEMBER_INVITE,
+    OrganizationPermission.MEMBER_INVITE_REVOKE,
     OrganizationPermission.MEMBER_UPDATE_ROLE,
     OrganizationPermission.MEMBER_REMOVE,
   ],
@@ -29,6 +31,7 @@ const ROLE_PERMISSIONS: Record<OrganizationRole, OrganizationPermission[]> = {
     OrganizationPermission.ORG_UPDATE,
     OrganizationPermission.MEMBER_LIST,
     OrganizationPermission.MEMBER_INVITE,
+    OrganizationPermission.MEMBER_INVITE_REVOKE,
     OrganizationPermission.MEMBER_UPDATE_ROLE,
     OrganizationPermission.MEMBER_REMOVE,
   ],

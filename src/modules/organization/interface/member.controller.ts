@@ -94,7 +94,7 @@ export class MemberController {
         members,
         200,
         "Members retrieved successfully",
-        SUCCESS_CODES.FETCHED,
+        SUCCESS_CODES.ORG_MEMBERS_FETCHED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -179,7 +179,33 @@ export class MemberController {
         invitations,
         200,
         "Invitations retrieved successfully",
-        SUCCESS_CODES.FETCHED,
+        SUCCESS_CODES.ORG_INVITATIONS_FETCHED,
+      );
+    } catch (err: any) {
+      if (err instanceof AppError) {
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
+      }
+      return errorResponse(res, 500, "Internal server error", err);
+    }
+  }
+
+  async revokeInvitation(req: Request, res: Response) {
+    try {
+      const { id, invitationId } = req.params;
+      const userId = (req as any).userId;
+      await this.memberService.revokeInvitation(id, invitationId, userId);
+      return successResponse(
+        res,
+        {},
+        200,
+        "Invitation revoked successfully",
+        SUCCESS_CODES.ORG_INVITATION_REVOKED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {

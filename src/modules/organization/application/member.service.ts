@@ -295,4 +295,25 @@ export class MemberService {
       targetUserId,
     );
   }
+
+  async revokeInvitation(
+    organizationId: string,
+    invitationId: string,
+    userId: string,
+  ): Promise<void> {
+    await this.ensureHasPermission(
+      organizationId,
+      userId,
+      OrganizationPermission.MEMBER_INVITE_REVOKE,
+    );
+
+    const invitations = await this.memberRepository.listInvitations(organizationId);
+    const invitation = invitations.find(i => i.id === invitationId);
+
+    if (!invitation) {
+      throw new AppError("Invitation not found", 404, ERROR_CODES.NOT_FOUND);
+    }
+
+    await this.memberRepository.deleteInvitation(invitationId);
+  }
 }

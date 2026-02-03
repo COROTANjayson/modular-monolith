@@ -42,4 +42,5 @@ export interface IMemberRepository {
     data: Partial<OrganizationInvitation>,
   ): Promise<OrganizationInvitation>;
   listInvitations(organizationId: string): Promise<OrganizationInvitation[]>;
+  deleteInvitation(id: string): Promise<void>;
 }
