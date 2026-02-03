@@ -2,29 +2,35 @@
  * Application Layer - Organization Service
  */
 
-import { IOrganizationRepository } from "../domain/ports";
+import { IOrganizationRepository } from "../domain/organization.repository";
+import { IMemberRepository } from "../domain/member.repository";
 import {
   CreateOrganizationDto,
   UpdateOrganizationDto,
 } from "./organization.dto";
 import {
   Organization,
+} from "../domain/organization.entity";
+import {
   OrganizationRole,
   OrganizationMemberStatus,
-} from "../domain/organization.entity";
+} from "../domain/member.entity";
 import { OrganizationPermission, hasPermission } from "../domain/permissions";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
 
 export class OrganizationService {
-  constructor(private organizationRepository: IOrganizationRepository) {}
+  constructor(
+    private organizationRepository: IOrganizationRepository,
+    private memberRepository: IMemberRepository,
+  ) {}
 
   private async ensureHasPermission(
     organizationId: string,
     userId: string,
     permission: OrganizationPermission,
   ): Promise<OrganizationRole> {
-    const member = await this.organizationRepository.findMember(
+    const member = await this.memberRepository.findMember(
       organizationId,
       userId,
     );
@@ -59,7 +65,7 @@ export class OrganizationService {
     });
 
     // Add owner as active member
-    await this.organizationRepository.addMember({
+    await this.memberRepository.addMember({
       organizationId: organization.id,
       userId: ownerId,
       role: OrganizationRole.OWNER,

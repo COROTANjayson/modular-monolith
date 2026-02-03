@@ -1,7 +1,7 @@
 /**
  * Domain Layer - Organization Permissions
  */
-import { OrganizationRole } from "./organization.entity";
+import { OrganizationRole } from "./member.entity";
 
 export enum OrganizationPermission {
   ORG_READ = "org:read",

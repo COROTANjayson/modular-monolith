@@ -2,7 +2,8 @@
  * Application Layer - Member Service
  */
 
-import { IOrganizationRepository } from "../domain/ports";
+import { IOrganizationRepository } from "../domain/organization.repository";
+import { IMemberRepository } from "../domain/member.repository";
 import { IUserRepository } from "../../user/application/ports";
 import { InviteUserDto, UpdateMemberRoleDto } from "./organization.dto";
 import {
@@ -10,7 +11,7 @@ import {
   OrganizationInvitation,
   OrganizationRole,
   OrganizationMemberStatus,
-} from "../domain/organization.entity";
+} from "../domain/member.entity";
 import { OrganizationPermission, hasPermission } from "../domain/permissions";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
@@ -19,6 +20,7 @@ import { v4 as uuidv4 } from "uuid";
 export class MemberService {
   constructor(
     private organizationRepository: IOrganizationRepository,
+    private memberRepository: IMemberRepository,
     private userRepository: IUserRepository,
   ) {}
 
@@ -27,7 +29,7 @@ export class MemberService {
     userId: string,
     permission: OrganizationPermission,
   ): Promise<OrganizationRole> {
-    const member = await this.organizationRepository.findMember(
+    const member = await this.memberRepository.findMember(
       organizationId,
       userId,
     );
@@ -81,7 +83,7 @@ export class MemberService {
 
     const userToInvite = await this.userRepository.findByEmail(data.email);
     if (userToInvite) {
-      const existingMember = await this.organizationRepository.findMember(
+      const existingMember = await this.memberRepository.findMember(
         organizationId,
         userToInvite.id,
       );
@@ -96,9 +98,11 @@ export class MemberService {
 
     const token = uuidv4();
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
+    // expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
+    expiresAt.setDate(expiresAt.getDate() + 1); // 1 days expiry
 
-    return this.organizationRepository.createInvitation({
+
+    return this.memberRepository.createInvitation({
       organizationId,
       inviterId,
       email: data.email,
@@ -110,7 +114,7 @@ export class MemberService {
 
   async acceptInvitation(token: string, userId: string): Promise<void> {
     const invitation =
-      await this.organizationRepository.findInvitationByToken(token);
+      await this.memberRepository.findInvitationByToken(token);
 
     if (!invitation) {
       throw new AppError(
@@ -154,12 +158,12 @@ export class MemberService {
     }
 
     // Mark invitation as accepted
-    await this.organizationRepository.updateInvitation(invitation.id, {
+    await this.memberRepository.updateInvitation(invitation.id, {
       acceptedAt: new Date(),
     });
 
     // Add member
-    await this.organizationRepository.addMember({
+    await this.memberRepository.addMember({
       organizationId: invitation.organizationId,
       userId,
       role: invitation.role,
@@ -176,7 +180,19 @@ export class MemberService {
       userId,
       OrganizationPermission.MEMBER_LIST,
     );
-    return this.organizationRepository.listMembers(organizationId);
+    return this.memberRepository.listMembers(organizationId);
+  }
+
+  async listInvitations(
+    organizationId: string,
+    userId: string,
+  ): Promise<OrganizationInvitation[]> {
+    await this.ensureHasPermission(
+      organizationId,
+      userId,
+      OrganizationPermission.MEMBER_LIST,
+    );
+    return this.memberRepository.listInvitations(organizationId);
   }
 
   async updateMemberRole(
@@ -191,7 +207,7 @@ export class MemberService {
       OrganizationPermission.MEMBER_UPDATE_ROLE,
     );
 
-    const targetMember = await this.organizationRepository.findMember(
+    const targetMember = await this.memberRepository.findMember(
       organizationId,
       targetUserId,
     );
@@ -226,7 +242,7 @@ export class MemberService {
       );
     }
 
-    return this.organizationRepository.updateMember(
+    return this.memberRepository.updateMember(
       organizationId,
       targetUserId,
       {
@@ -246,7 +262,7 @@ export class MemberService {
       OrganizationPermission.MEMBER_REMOVE,
     );
 
-    const targetMember = await this.organizationRepository.findMember(
+    const targetMember = await this.memberRepository.findMember(
       organizationId,
       targetUserId,
     );
@@ -274,7 +290,7 @@ export class MemberService {
       );
     }
 
-    await this.organizationRepository.removeMember(
+    await this.memberRepository.removeMember(
       organizationId,
       targetUserId,
     );

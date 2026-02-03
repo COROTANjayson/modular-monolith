@@ -2,19 +2,6 @@
  * Domain Layer - Organization Entities
  */
 
-export enum OrganizationRole {
-  OWNER = "owner",
-  ADMIN = "admin",
-  MEMBER = "member",
-}
-
-export enum OrganizationMemberStatus {
-  INVITED = "invited",
-  ACTIVE = "active",
-  SUSPENDED = "suspended",
-  LEFT = "left",
-}
-
 export interface Organization {
   id: string;
   name: string;
@@ -22,32 +9,4 @@ export interface Organization {
   ownerId: string;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface OrganizationMember {
-  id: string;
-  organizationId: string;
-  userId: string;
-  role: OrganizationRole;
-  status: OrganizationMemberStatus;
-  invitedAt: Date;
-  joinedAt: Date | null;
-  user?: {
-    id: string;
-    firstName: string | null;
-    lastName: string | null;
-    email: string;
-  };
-}
-
-export interface OrganizationInvitation {
-  id: string;
-  organizationId: string;
-  inviterId: string;
-  email: string;
-  role: OrganizationRole;
-  token: string;
-  expiresAt: Date;
-  acceptedAt: Date | null;
-  createdAt: Date;
 }

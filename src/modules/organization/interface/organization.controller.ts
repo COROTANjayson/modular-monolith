@@ -13,7 +13,7 @@ import { AppError } from "../../../shared/utils/app-error";
 import {
   createOrganizationSchema,
   updateOrganizationSchema,
-} from "./validation";
+} from "./organization.validation";
 import {
   SUCCESS_CODES,
   ERROR_CODES,

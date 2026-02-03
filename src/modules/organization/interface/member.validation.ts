@@ -1,21 +1,9 @@
 /**
- * Interface Layer - Organization Validation
+ * Interface Layer - Member Validation
  */
 
 import { z } from "zod";
-import { OrganizationRole } from "../domain/organization.entity";
-
-export const createOrganizationSchema = z
-  .object({
-    name: z.string().min(3).max(50),
-  })
-  .strict();
-
-export const updateOrganizationSchema = z
-  .object({
-    name: z.string().min(3).max(50).optional(),
-  })
-  .strict();
+import { OrganizationRole } from "../domain/member.entity";
 
 export const inviteUserSchema = z
   .object({

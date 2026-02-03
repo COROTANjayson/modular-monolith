@@ -1,26 +1,14 @@
 /**
- * Domain Layer - Repository Ports
+ * Domain Layer - Member Repository Port
  */
 
 import {
-  Organization,
+  OrganizationRole,
   OrganizationMember,
   OrganizationInvitation,
-  OrganizationRole,
-} from "./organization.entity";
+} from "./member.entity";
 
-export interface IOrganizationRepository {
-  create(data: {
-    name: string;
-    slug: string;
-    ownerId: string;
-  }): Promise<Organization>;
-  findById(id: string): Promise<Organization | null>;
-  findBySlug(slug: string): Promise<Organization | null>;
-  findAllByUserId(userId: string): Promise<Organization[]>;
-  update(id: string, data: Partial<Organization>): Promise<Organization>;
-
-  // Members
+export interface IMemberRepository {
   addMember(data: {
     organizationId: string;
     userId: string;
@@ -53,4 +41,5 @@ export interface IOrganizationRepository {
     id: string,
     data: Partial<OrganizationInvitation>,
   ): Promise<OrganizationInvitation>;
+  listInvitations(organizationId: string): Promise<OrganizationInvitation[]>;
 }
