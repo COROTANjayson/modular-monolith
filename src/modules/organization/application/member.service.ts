@@ -316,4 +316,40 @@ export class MemberService {
 
     await this.memberRepository.deleteInvitation(invitationId);
   }
+
+  async updateMemberStatus(
+    organizationId: string,
+    targetUserId: string,
+    status: OrganizationMemberStatus,
+    currentUserId: string,
+  ): Promise<OrganizationMember> {
+    const currentUserRole = await this.ensureHasPermission(
+      organizationId,
+      currentUserId,
+      OrganizationPermission.MEMBER_UPDATE_STATUS,
+    );
+
+    const targetMember = await this.memberRepository.findMember(
+      organizationId,
+      targetUserId,
+    );
+    if (!targetMember) {
+      throw new AppError("Member not found", 404, ERROR_CODES.NOT_FOUND);
+    }
+
+    // Protection for Owner
+    if (targetMember.role === OrganizationRole.OWNER) {
+      throw new AppError(
+        "Cannot change status of organization owner",
+        400,
+        ERROR_CODES.BAD_REQUEST,
+      );
+    }
+
+    return this.memberRepository.updateMember(
+      organizationId,
+      targetUserId,
+      { status },
+    );
+  }
 }

@@ -3,7 +3,7 @@
  */
 
 import { z } from "zod";
-import { OrganizationRole } from "../domain/member.entity";
+import { OrganizationRole, OrganizationMemberStatus } from "../domain/member.entity";
 
 export const inviteUserSchema = z
   .object({
@@ -21,5 +21,10 @@ export const acceptInvitationSchema = z
 export const updateMemberRoleSchema = z
   .object({
     role: z.nativeEnum(OrganizationRole),
+  })
+  .strict();
+export const updateMemberStatusSchema = z
+  .object({
+    status: z.nativeEnum(OrganizationMemberStatus),
   })
   .strict();

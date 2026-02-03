@@ -30,8 +30,11 @@ export function createMemberRouter(memberController: MemberController): Router {
   router.get("/:id/invitations", (req, res) =>
     memberController.listInvitations(req, res),
   );
-  router.patch("/:id/members/:userId", (req, res) =>
+  router.patch("/:id/members/:userId/role", (req, res) =>
     memberController.updateMemberRole(req, res),
+  );
+  router.patch("/:id/members/:userId/status", (req, res) =>
+    memberController.updateMemberStatus(req, res),
   );
   router.delete("/:id/members/:userId", (req, res) =>
     memberController.removeMember(req, res),
