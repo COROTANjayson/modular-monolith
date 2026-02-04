@@ -183,6 +183,24 @@ export class MemberService {
     return this.memberRepository.listMembers(organizationId);
   }
 
+  async getCurrentMember(
+    organizationId: string,
+    userId: string,
+  ): Promise<OrganizationMember> {
+    const member = await this.memberRepository.findMember(
+      organizationId,
+      userId,
+    );
+    if (!member) {
+      throw new AppError(
+        "You are not a member of this organization",
+        403,
+        ERROR_CODES.FORBIDDEN,
+      );
+    }
+    return member;
+  }
+
   async listInvitations(
     organizationId: string,
     userId: string,

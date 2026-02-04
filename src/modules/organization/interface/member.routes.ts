@@ -27,6 +27,9 @@ export function createMemberRouter(memberController: MemberController): Router {
   router.get("/:id/members", (req, res) =>
     memberController.listMembers(req, res),
   );
+  router.get("/:id/members/me", (req, res) =>
+    memberController.getMe(req, res),
+  );
   router.get("/:id/invitations", (req, res) =>
     memberController.listInvitations(req, res),
   );

@@ -111,6 +111,32 @@ export class MemberController {
     }
   }
 
+  async getMe(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const userId = (req as any).userId;
+      const member = await this.memberService.getCurrentMember(id, userId);
+      return successResponse(
+        res,
+        member,
+        200,
+        "Current member retrieved successfully",
+        SUCCESS_CODES.FETCHED,
+      );
+    } catch (err: any) {
+      if (err instanceof AppError) {
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
+      }
+      return errorResponse(res, 500, "Internal server error", err);
+    }
+  }
+
   async updateMemberRole(req: Request, res: Response) {
     try {
       const { id, userId } = req.params;
