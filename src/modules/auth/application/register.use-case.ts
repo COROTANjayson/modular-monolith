@@ -62,9 +62,14 @@ export class RegisterUseCase {
       isVerified: false,
     });
 
-    // Send verification email
-    const verificationLink = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
-    await this.emailService.sendVerificationEmail(user.email, verificationLink);
+    // Send verification email (non-blocking - don't fail registration if email fails)
+    try {
+      const verificationLink = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
+      await this.emailService.sendVerificationEmail(user.email, verificationLink);
+    } catch (error) {
+      // Log error but don't fail registration
+      console.warn('Failed to send verification email:', error);
+    }
 
     // Auto-login after registration
     const jti = this.tokenGenerator.generateUUID();

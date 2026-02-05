@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: modular-monolith-test-db
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: modular_monolith_test
+    ports:
+      - "5433:5432"  # Use 5433 to avoid conflicts with production DB
+    # Store data in tmpfs for faster tests (data cleared on container stop)
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d modular_monolith_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
