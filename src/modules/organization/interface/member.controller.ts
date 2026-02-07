@@ -21,6 +21,7 @@ import {
   SUCCESS_CODES,
   ERROR_CODES,
 } from "../../../shared/utils/response-code";
+import { ORG_SUCCESS_CODES } from "./organization.response-codes";
 
 export class MemberController {
   constructor(private memberService: MemberService) {}
@@ -41,7 +42,7 @@ export class MemberController {
         invitation,
         201,
         "Invitation sent successfully",
-        SUCCESS_CODES.ORG_INVITATION_SENT,
+        ORG_SUCCESS_CODES.ORG_INVITATION_SENT,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -69,7 +70,7 @@ export class MemberController {
         {},
         200,
         "Invitation accepted successfully",
-        SUCCESS_CODES.ORG_INVITATION_ACCEPTED,
+        ORG_SUCCESS_CODES.ORG_INVITATION_ACCEPTED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -95,7 +96,7 @@ export class MemberController {
         members,
         200,
         "Members retrieved successfully",
-        SUCCESS_CODES.ORG_MEMBERS_FETCHED,
+        ORG_SUCCESS_CODES.ORG_MEMBERS_FETCHED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -154,7 +155,7 @@ export class MemberController {
         member,
         200,
         "Member role updated successfully",
-        SUCCESS_CODES.ORG_MEMBER_ROLE_UPDATED,
+        ORG_SUCCESS_CODES.ORG_MEMBER_ROLE_UPDATED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -180,7 +181,7 @@ export class MemberController {
         {},
         200,
         "Member removed successfully",
-        SUCCESS_CODES.ORG_MEMBER_REMOVED,
+        ORG_SUCCESS_CODES.ORG_MEMBER_REMOVED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -206,7 +207,7 @@ export class MemberController {
         invitations,
         200,
         "Invitations retrieved successfully",
-        SUCCESS_CODES.ORG_INVITATIONS_FETCHED,
+        ORG_SUCCESS_CODES.ORG_INVITATIONS_FETCHED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -232,7 +233,7 @@ export class MemberController {
         {},
         200,
         "Invitation revoked successfully",
-        SUCCESS_CODES.ORG_INVITATION_REVOKED,
+        ORG_SUCCESS_CODES.ORG_INVITATION_REVOKED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -265,7 +266,7 @@ export class MemberController {
         member,
         200,
         "Member status updated successfully",
-        SUCCESS_CODES.ORG_MEMBER_STATUS_UPDATED,
+        ORG_SUCCESS_CODES.ORG_MEMBER_STATUS_UPDATED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {

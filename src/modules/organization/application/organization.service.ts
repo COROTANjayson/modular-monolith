@@ -18,6 +18,7 @@ import {
 import { OrganizationPermission, hasPermission } from "../domain/permissions";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
+import { ORG_ERROR_CODES } from "../interface/organization.response-codes";
 
 export class OrganizationService {
   constructor(
@@ -83,7 +84,7 @@ export class OrganizationService {
       throw new AppError(
         "Organization not found",
         404,
-        ERROR_CODES.ORG_NOT_FOUND,
+        ORG_ERROR_CODES.ORG_NOT_FOUND,
       );
     }
     return organization;
@@ -109,7 +110,7 @@ export class OrganizationService {
       throw new AppError(
         "Organization not found",
         404,
-        ERROR_CODES.ORG_NOT_FOUND,
+        ORG_ERROR_CODES.ORG_NOT_FOUND,
       );
     }
 

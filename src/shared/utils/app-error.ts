@@ -2,13 +2,13 @@ import { ErrorCode } from "./response-code";
 
 export class AppError extends Error {
   public statusCode: number;
-  public code?: ErrorCode;
+  public code?: string;
   public errors?: any;
 
   constructor(
     message: string,
     statusCode = 400,
-    code?: ErrorCode,
+    code?: string,
     errors?: any,
   ) {
     super(message);

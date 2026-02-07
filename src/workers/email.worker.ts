@@ -1,11 +1,11 @@
 import { Worker, Job } from "bullmq";
-import { getRedisClient } from "../libs/redis.config";
+import { getRedisClient } from "../shared/infra/redis";
 import { EmailJobData } from "../queues/email.queue";
 import {
   EMAIL_QUEUE_RATE_LIMIT,
   EMAIL_QUEUE_RATE_DURATION,
 } from "../shared/utils/config";
-import { logger } from "../libs/logger";
+import { logger } from "../shared/infra/logger";
 import { EmailService } from "../shared/utils/email.service";
 
 let emailWorker: Worker<EmailJobData> | null = null;

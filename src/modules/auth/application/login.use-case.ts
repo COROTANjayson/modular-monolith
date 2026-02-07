@@ -2,7 +2,7 @@ import { AuthRules } from "../domain/auth-rules";
 import { IAuthUserRepository, IPasswordHasher, ITokenGenerator } from "./ports";
 import { LoginInput, AuthTokens } from "./auth.dto";
 import { AppError } from "../../../shared/utils/app-error";
-import { ERROR_CODES } from "../../../shared/utils/response-code";
+import { AUTH_ERROR_CODES } from "../interface/auth.response-codes";
 
 export class LoginUseCase {
   constructor(
@@ -18,7 +18,7 @@ export class LoginUseCase {
       throw new AppError(
         "Email does not exist",
         404,
-        ERROR_CODES.AUTH_USER_NOT_FOUND,
+        AUTH_ERROR_CODES.AUTH_USER_NOT_FOUND,
       );
     }
 
@@ -28,7 +28,7 @@ export class LoginUseCase {
       throw new AppError(
         canLogin.reason || "Cannot login",
         401,
-        ERROR_CODES.AUTH_NOT_VERIFIED,
+        AUTH_ERROR_CODES.AUTH_NOT_VERIFIED,
       );
     }
 
@@ -41,7 +41,7 @@ export class LoginUseCase {
       throw new AppError(
         "Invalid credentials",
         401,
-        ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+        AUTH_ERROR_CODES.AUTH_INVALID_CREDENTIALS,
       );
     }
 

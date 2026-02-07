@@ -2,7 +2,8 @@
  * Application Layer - Organization DTOs
  */
 
-import { OrganizationRole } from "../domain/organization.entity";
+import { OrganizationRole } from "../domain/member.entity";
+
 
 export interface CreateOrganizationDto {
   name: string;

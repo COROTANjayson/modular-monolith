@@ -17,6 +17,10 @@ import {
   ERROR_CODES,
 } from "../../../shared/utils/response-code";
 import {
+  AUTH_SUCCESS_CODES,
+  AUTH_ERROR_CODES,
+} from "./auth.response-codes";
+import {
   COOKIE_DOMAIN,
   COOKIE_SAME_SITE,
   COOKIE_SECURE,
@@ -68,7 +72,7 @@ export class AuthController {
         result,
         201,
         "User registered successfully",
-        SUCCESS_CODES.AUTH_REGISTER_SUCCESS,
+        AUTH_SUCCESS_CODES.AUTH_REGISTER_SUCCESS,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -123,7 +127,7 @@ export class AuthController {
         { ...tokens, csrfToken },
         200,
         "Login Success",
-        SUCCESS_CODES.AUTH_LOGIN_SUCCESS,
+        AUTH_SUCCESS_CODES.AUTH_LOGIN_SUCCESS,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -156,7 +160,7 @@ export class AuthController {
           400,
           "refreshToken required",
           null,
-          ERROR_CODES.AUTH_INVALID_TOKEN,
+          AUTH_ERROR_CODES.AUTH_INVALID_TOKEN,
         );
       }
 
@@ -177,7 +181,7 @@ export class AuthController {
         tokens,
         200,
         "Token Refresh",
-        SUCCESS_CODES.AUTH_TOKEN_REFRESH_SUCCESS,
+        AUTH_SUCCESS_CODES.AUTH_TOKEN_REFRESH_SUCCESS,
       );
     } catch (err: any) {
       // Clear cookies on any refresh error to prevent stuck sessions
@@ -232,7 +236,7 @@ export class AuthController {
         {},
         200,
         "Logout",
-        SUCCESS_CODES.AUTH_LOGOUT_SUCCESS,
+        AUTH_SUCCESS_CODES.AUTH_LOGOUT_SUCCESS,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -255,7 +259,7 @@ export class AuthController {
         result,
         200,
         "Email verified",
-        SUCCESS_CODES.AUTH_EMAIL_VERIFIED,
+        AUTH_SUCCESS_CODES.AUTH_EMAIL_VERIFIED,
       );
     } catch (err: any) {
       logger.error("Email verification failed:", { error: err.message });
@@ -282,7 +286,7 @@ export class AuthController {
         result,
         200,
         "Verification email sent",
-        SUCCESS_CODES.AUTH_VERIFICATION_SENT,
+        AUTH_SUCCESS_CODES.AUTH_VERIFICATION_SENT,
       );
     } catch (err: any) {
       logger.error("Resend verification failed:", {
@@ -315,7 +319,7 @@ export class AuthController {
         {},
         200,
         "Password updated successfully",
-        SUCCESS_CODES.AUTH_PASSWORD_UPDATED,
+        AUTH_SUCCESS_CODES.AUTH_PASSWORD_UPDATED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {

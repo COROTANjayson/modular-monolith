@@ -4,7 +4,7 @@
 
 import { IOrganizationRepository } from "../domain/organization.repository";
 import { IMemberRepository } from "../domain/member.repository";
-import { IUserRepository } from "../../user/application/ports";
+import { IUserRepository } from "../../user/domain/user.repository";
 import { InviteUserDto, UpdateMemberRoleDto } from "./organization.dto";
 import {
   OrganizationMember,
@@ -15,6 +15,7 @@ import {
 import { OrganizationPermission, hasPermission } from "../domain/permissions";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
+import { ORG_ERROR_CODES } from "../interface/organization.response-codes";
 import { v4 as uuidv4 } from "uuid";
 
 export class MemberService {
@@ -69,7 +70,7 @@ export class MemberService {
       throw new AppError(
         "Organization not found",
         404,
-        ERROR_CODES.ORG_NOT_FOUND,
+        ORG_ERROR_CODES.ORG_NOT_FOUND,
       );
     }
 
@@ -91,7 +92,7 @@ export class MemberService {
         throw new AppError(
           "User is already a member of this organization",
           400,
-          ERROR_CODES.ORG_ALREADY_MEMBER,
+          ORG_ERROR_CODES.ORG_ALREADY_MEMBER,
         );
       }
     }
@@ -120,7 +121,7 @@ export class MemberService {
       throw new AppError(
         "Invalid or expired invitation token",
         400,
-        ERROR_CODES.ORG_INVITATION_INVALID,
+        ORG_ERROR_CODES.ORG_INVITATION_INVALID,
       );
     }
 
@@ -128,7 +129,7 @@ export class MemberService {
       throw new AppError(
         "You cannot accept an invitation you sent yourself",
         400,
-        ERROR_CODES.ORG_INVITATION_INVALID,
+        ORG_ERROR_CODES.ORG_INVITATION_INVALID,
       );
     }
 
@@ -137,7 +138,7 @@ export class MemberService {
       throw new AppError(
         "This invitation was sent to a different email address",
         400,
-        ERROR_CODES.ORG_INVITATION_INVALID,
+        ORG_ERROR_CODES.ORG_INVITATION_INVALID,
       );
     }
 
@@ -145,7 +146,7 @@ export class MemberService {
       throw new AppError(
         "Invitation already accepted",
         400,
-        ERROR_CODES.ORG_ALREADY_MEMBER,
+        ORG_ERROR_CODES.ORG_ALREADY_MEMBER,
       );
     }
 
@@ -153,7 +154,7 @@ export class MemberService {
       throw new AppError(
         "Invitation expired",
         400,
-        ERROR_CODES.ORG_INVITATION_EXPIRED,
+        ORG_ERROR_CODES.ORG_INVITATION_EXPIRED,
       );
     }
 

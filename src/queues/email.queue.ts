@@ -1,6 +1,6 @@
 import { Queue } from "bullmq";
-import { getRedisClient } from "../libs/redis.config";
-import { logger } from "../libs/logger";
+import { getRedisClient } from "../shared/infra/redis";
+import { logger } from "../shared/infra/logger";
 
 /**
  * Generic email job data

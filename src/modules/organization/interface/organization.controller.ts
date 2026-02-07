@@ -18,6 +18,7 @@ import {
   SUCCESS_CODES,
   ERROR_CODES,
 } from "../../../shared/utils/response-code";
+import { ORG_SUCCESS_CODES } from "./organization.response-codes";
 
 export class OrganizationController {
   constructor(private organizationService: OrganizationService) {}
@@ -36,7 +37,7 @@ export class OrganizationController {
         organization,
         201,
         "Organization created successfully",
-        SUCCESS_CODES.ORG_CREATED,
+        ORG_SUCCESS_CODES.ORG_CREATED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {
@@ -124,7 +125,7 @@ export class OrganizationController {
         organization,
         200,
         "Organization updated successfully",
-        SUCCESS_CODES.ORG_UPDATED,
+        ORG_SUCCESS_CODES.ORG_UPDATED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {

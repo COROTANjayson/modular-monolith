@@ -2,7 +2,7 @@ import { AuthRules } from "../domain/auth-rules";
 import { IAuthUserRepository, ITokenGenerator } from "./ports";
 import { AuthTokens } from "./auth.dto";
 import { AppError } from "../../../shared/utils/app-error";
-import { ERROR_CODES } from "../../../shared/utils/response-code";
+import { AUTH_ERROR_CODES } from "../interface/auth.response-codes";
 
 export class RefreshTokenUseCase {
   constructor(
@@ -19,7 +19,7 @@ export class RefreshTokenUseCase {
       throw new AppError(
         "Invalid refresh token",
         401,
-        ERROR_CODES.AUTH_INVALID_TOKEN,
+        AUTH_ERROR_CODES.AUTH_INVALID_TOKEN,
       );
     }
 
@@ -29,7 +29,7 @@ export class RefreshTokenUseCase {
       throw new AppError(
         "Invalid token (user not found)",
         401,
-        ERROR_CODES.AUTH_UNAUTHORIZED,
+        AUTH_ERROR_CODES.AUTH_UNAUTHORIZED,
       );
     }
 
@@ -38,7 +38,7 @@ export class RefreshTokenUseCase {
       throw new AppError(
         "Refresh token revoked or already used",
         401,
-        ERROR_CODES.AUTH_TOKEN_EXPIRED,
+        AUTH_ERROR_CODES.AUTH_TOKEN_EXPIRED,
       );
     }
 

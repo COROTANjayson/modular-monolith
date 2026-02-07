@@ -3,6 +3,7 @@ import { IAuthUserRepository, IPasswordHasher } from "./ports";
 import { UpdatePasswordInput } from "./auth.dto";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
+import { AUTH_ERROR_CODES } from "../interface/auth.response-codes";
 
 export class UpdatePasswordUseCase {
   constructor(
@@ -17,7 +18,7 @@ export class UpdatePasswordUseCase {
       throw new AppError(
         "User not found",
         404,
-        ERROR_CODES.AUTH_USER_NOT_FOUND,
+        AUTH_ERROR_CODES.AUTH_USER_NOT_FOUND,
       );
     }
 
@@ -39,7 +40,7 @@ export class UpdatePasswordUseCase {
         throw new AppError(
           "Invalid old password",
           401,
-          ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+          AUTH_ERROR_CODES.AUTH_INVALID_CREDENTIALS,
         );
       }
     }
@@ -50,7 +51,7 @@ export class UpdatePasswordUseCase {
       throw new AppError(
         passwordValidation.reason || "Invalid new password",
         400,
-        ERROR_CODES.AUTH_INVALID_PASSWORD,
+        AUTH_ERROR_CODES.AUTH_INVALID_PASSWORD,
       );
     }
 

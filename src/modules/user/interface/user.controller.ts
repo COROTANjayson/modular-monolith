@@ -4,7 +4,8 @@
 
 import { Request, Response } from "express";
 import { UserService } from "../application/user.service";
-import { UpdateUserSchema } from "../application/user.dto";
+import { UpdateUserDto } from "../application/user.dto";
+import { UpdateUserSchema } from "./validation";
 import {
   successResponse,
   errorResponse,
@@ -14,6 +15,7 @@ import {
   SUCCESS_CODES,
   ERROR_CODES,
 } from "../../../shared/utils/response-code";
+import { USER_SUCCESS_CODES } from "./user.response-codes";
 import { validate } from "../../../shared/utils/validate";
 
 export class UserController {
@@ -28,7 +30,7 @@ export class UserController {
         user,
         200,
         "User data retrieved successfully",
-        SUCCESS_CODES.USER_DATA_FETCHED,
+        USER_SUCCESS_CODES.USER_DATA_FETCHED,
       );
     } catch (error: any) {
       if (error instanceof AppError) {
@@ -47,7 +49,7 @@ export class UserController {
   async updateMe(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
-      const validatedData = validate(UpdateUserSchema, req.body);
+      const validatedData = validate(UpdateUserSchema, req.body) as UpdateUserDto;
 
       const user = await this.userService.updateUser(userId, validatedData);
       return successResponse(
@@ -55,7 +57,7 @@ export class UserController {
         user,
         200,
         "User updated successfully",
-        SUCCESS_CODES.USER_DATA_UPDATED,
+        USER_SUCCESS_CODES.USER_DATA_UPDATED,
       );
     } catch (error: any) {
       if (error instanceof AppError) {

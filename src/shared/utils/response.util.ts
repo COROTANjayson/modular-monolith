@@ -21,7 +21,7 @@ export const successResponse = <T>(
   data: T,
   statusCode = 200,
   message = "Success",
-  code: SuccessCode = SUCCESS_CODES.DEFAULT,
+  code: string = SUCCESS_CODES.DEFAULT,
 ) => {
   const response: ApiResponse<T> = {
     success: true,
@@ -37,7 +37,7 @@ export const errorResponse = (
   statusCode = 500,
   message = "Something went wrong",
   errors?: any,
-  code: ErrorCode = ERROR_CODES.DEFAULT,
+  code: string = ERROR_CODES.DEFAULT,
 ) => {
   const response: ApiResponse = {
     success: false,

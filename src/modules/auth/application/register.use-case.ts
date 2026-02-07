@@ -7,6 +7,7 @@ import {
 } from "./ports";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
+import { AUTH_ERROR_CODES } from "../interface/auth.response-codes";
 import { RegisterInput, RegisterOutput } from "./auth.dto";
 
 export class RegisterUseCase {
@@ -23,7 +24,7 @@ export class RegisterUseCase {
       throw new AppError(
         "Invalid email format",
         400,
-        ERROR_CODES.AUTH_INVALID_EMAIL,
+        AUTH_ERROR_CODES.AUTH_INVALID_EMAIL,
       );
     }
 
@@ -32,7 +33,7 @@ export class RegisterUseCase {
       throw new AppError(
         passwordCheck.reason || "Invalid password",
         400,
-        ERROR_CODES.AUTH_INVALID_PASSWORD,
+        AUTH_ERROR_CODES.AUTH_INVALID_PASSWORD,
       );
     }
 
@@ -42,7 +43,7 @@ export class RegisterUseCase {
       throw new AppError(
         "Email already registered",
         409,
-        ERROR_CODES.AUTH_EMAIL_EXISTS,
+        AUTH_ERROR_CODES.AUTH_EMAIL_EXISTS,
       );
     }
 

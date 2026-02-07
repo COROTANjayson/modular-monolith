@@ -9,7 +9,7 @@ import {
   CSRF_COOKIE_NAME,
   CSRF_SECRET,
 } from "../shared/utils/config";
-import { logger } from "../libs/logger";
+import { logger } from "../shared/infra/logger";
 
 // ✅ Step 1: Issue token if not exists
 export const csrfTokenMiddleware = (

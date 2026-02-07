@@ -4,9 +4,9 @@ dotenv.config();
 import app from "./app";
 import { startEmailWorker, closeEmailWorker } from "./workers/email.worker";
 import { closeEmailQueue } from "./queues/email.queue";
-import { closeRedis } from "./libs/redis.config";
+import { closeRedis } from "./shared/infra/redis";
 
-import { logger } from "./libs/logger";
+import { logger } from "./shared/infra/logger";
 
 const port = process.env.PORT || 3000;
 

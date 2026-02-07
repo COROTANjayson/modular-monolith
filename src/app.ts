@@ -10,7 +10,7 @@ import {
   csrfTokenMiddleware,
   verifyCsrfMiddleware,
 } from "./middlewares/csrfMiddleware";
-import { logger } from "./libs/logger";
+import { logger } from "./shared/infra/logger";
 import { CLIENT_URL } from "./shared/utils/config";
 // import csrf from 'csurf';
 // https://chatgpt.com/c/68eb9870-0f28-8321-89fb-b3f88308208d <- csrf
