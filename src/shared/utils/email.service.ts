@@ -16,9 +16,12 @@ export class EmailService {
       this.resend = new Resend(RESEND_API_KEY);
       logger.info("Resend Initialized");
     } else {
-      logger.warn(
-        "Resend credentials not found. Email sending will be simulated.",
-      );
+      // Only log warning in non-test environments
+      if (process.env.NODE_ENV !== 'test') {
+        logger.warn(
+          "Resend credentials not found. Email sending will be simulated.",
+        );
+      }
     }
   }
 

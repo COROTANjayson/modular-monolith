@@ -9,6 +9,11 @@ let redis: Redis | null = null;
  * Used by BullMQ for job queue management
  */
 export function getRedisClient(): Redis | null {
+  // Skip Redis in test environment
+  if (process.env.NODE_ENV === 'test') {
+    return null;
+  }
+
   if (redis) {
     return redis;
   }

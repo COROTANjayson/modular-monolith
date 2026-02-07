@@ -21,6 +21,11 @@ export type EmailJobData = EmailJob;
 let emailQueue: Queue<EmailJobData> | null = null;
 
 export function getEmailQueue(): Queue<EmailJobData> | null {
+  // Skip queue initialization in test environment
+  if (process.env.NODE_ENV === 'test') {
+    return null;
+  }
+
   if (emailQueue) {
     return emailQueue;
   }
