@@ -69,7 +69,10 @@ export class RegisterUseCase {
       await this.emailService.sendVerificationEmail(user.email, verificationLink);
     } catch (error) {
       // Log error but don't fail registration
-      console.warn('Failed to send verification email:', error);
+      // Skip logging in test environment to keep test output clean
+      if (process.env.NODE_ENV !== 'test') {
+        console.warn('Failed to send verification email:', error);
+      }
     }
 
     // Auto-login after registration

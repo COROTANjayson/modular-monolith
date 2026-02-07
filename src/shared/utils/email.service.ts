@@ -75,8 +75,11 @@ export class EmailService {
     try {
       await addEmailToQueue(emailData);
     } catch (error) {
-      logger.error("Failed to queue email:", error);
-      logger.info("Falling back to direct email sending...");
+      // Skip logging in test environment
+      if (process.env.NODE_ENV !== 'test') {
+        logger.error("Failed to queue email:", error);
+        logger.info("Falling back to direct email sending...");
+      }
       await this.sendEmail(emailData);
     }
   }

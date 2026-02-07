@@ -74,25 +74,22 @@ export class AuthController {
         "User registered successfully",
         AUTH_SUCCESS_CODES.AUTH_REGISTER_SUCCESS,
       );
-    } catch (err: any) {
-      if (err instanceof AppError) {
-        logger.error("Registration failed:", {
-          error: err.message,
-          email: req.body.email,
-        });
+    } catch (error: any) {
+      // Skip logging in test environment
+      if (process.env.NODE_ENV !== 'test') {
+        logger.error("Registration failed:", error);
+      }
+
+      if (error instanceof AppError) {
         return errorResponse(
           res,
-          err.statusCode,
-          err.message,
-          err.errors,
-          err.code,
+          error.statusCode,
+          error.message,
+          error.errors,
+          error.code,
         );
       }
-      logger.error("Registration error:", {
-        error: err.message,
-        email: req.body.email,
-      });
-      return errorResponse(res, 500, "Internal server error", err);
+      return errorResponse(res, 500, "Internal server error", error);
     }
   }
 
@@ -130,11 +127,22 @@ export class AuthController {
         AUTH_SUCCESS_CODES.AUTH_LOGIN_SUCCESS,
       );
     } catch (err: any) {
+      // Skip logging in test environment
+      if (process.env.NODE_ENV !== 'test') {
+        if (err instanceof AppError) {
+          logger.error("Login failed:", {
+            error: err.message,
+            email: req.body.email,
+          });
+        } else {
+          logger.error("Login error:", {
+            error: err.message,
+            email: req.body.email,
+          });
+        }
+      }
+
       if (err instanceof AppError) {
-        logger.error("Login failed:", {
-          error: err.message,
-          email: req.body.email,
-        });
         return errorResponse(
           res,
           err.statusCode,
@@ -143,10 +151,6 @@ export class AuthController {
           err.code,
         );
       }
-      logger.error("Login error:", {
-        error: err.message,
-        email: req.body.email,
-      });
       return errorResponse(res, 500, "Internal server error", err);
     }
   }

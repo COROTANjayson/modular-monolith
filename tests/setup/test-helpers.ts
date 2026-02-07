@@ -142,5 +142,15 @@ export const createTestOrganization = async (params: CreateOrganizationParams) =
     },
   });
 
+  // Automatically add owner as active member (matching application behavior)
+  await prisma.organizationMember.create({
+    data: {
+      organizationId: organization.id,
+      userId: params.ownerId,
+      role: 'owner',
+      status: 'active',
+    },
+  });
+
   return organization;
 };
