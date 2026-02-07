@@ -154,3 +154,55 @@ export const createTestOrganization = async (params: CreateOrganizationParams) =
 
   return organization;
 };
+
+/**
+ * Helper to create a test member
+ */
+export interface CreateMemberParams {
+  organizationId: string;
+  userId: string;
+  role?: 'owner' | 'admin' | 'member';
+  status?: 'active' | 'suspended' | 'invited' | 'left';
+}
+
+export const createTestMember = async (params: CreateMemberParams) => {
+  const prisma = getPrismaTestClient();
+
+  return prisma.organizationMember.create({
+    data: {
+      organizationId: params.organizationId,
+      userId: params.userId,
+      role: params.role || 'member',
+      status: params.status || 'active',
+    },
+  });
+};
+
+/**
+ * Helper to create a test invitation
+ */
+export interface CreateInvitationParams {
+  organizationId: string;
+  inviterId: string;
+  email: string;
+  role?: 'admin' | 'member';
+  expiresAt?: Date;
+}
+
+export const createTestInvitation = async (params: CreateInvitationParams) => {
+  const prisma = getPrismaTestClient();
+  const { v4: uuidv4 } = require('uuid');
+  
+  const expiresAt = params.expiresAt || new Date(Date.now() + 24 * 60 * 60 * 1000); // 1 day from now
+  
+  return prisma.organizationInvitation.create({
+    data: {
+      organizationId: params.organizationId,
+      inviterId: params.inviterId,
+      email: params.email,
+      role: params.role || 'member',
+      token: uuidv4(), // Generate valid UUID
+      expiresAt,
+    },
+  });
+};
