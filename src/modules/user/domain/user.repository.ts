@@ -1,9 +1,8 @@
 /**
- * Application Layer - Ports
- * Interfaces for infrastructure implementations
+ * Domain Layer - User Repository Port
  */
 
-import { User, UserUpdateData } from "../domain/user.entity";
+import { User, UserUpdateData } from "./user.entity";
 
 export interface IUserRepository {
   findById(id: string): Promise<User | null>;

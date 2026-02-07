@@ -2,7 +2,7 @@
  * Application Layer - User Service
  */
 
-import { IUserRepository } from "./ports";
+import { IUserRepository } from "../domain/user.repository";
 import { UpdateUserDto } from "./user.dto";
 import { User } from "../domain/user.entity";
 import { AppError } from "../../../shared/utils/app-error";

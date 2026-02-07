@@ -3,7 +3,7 @@
  */
 
 import { prisma } from "../../../shared/infra/prisma";
-import { IUserRepository } from "../application/ports";
+import { IUserRepository } from "../domain/user.repository";
 import { User, UserUpdateData } from "../domain/user.entity";
 
 export class PrismaUserRepository implements IUserRepository {
