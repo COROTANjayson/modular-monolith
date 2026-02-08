@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
+import { swaggerOptions } from "./shared/config/swagger.config";
 import { createAuthModule } from "./modules/auth";
 import { createUserModule } from "./modules/user";
 import { createOrganizationModule } from "./modules/organization";
@@ -39,6 +42,13 @@ app.use(morganMiddleware);
 // Default: 100 requests per 15 minutes
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
 app.use(limiter);
+
+// Swagger API Documentation
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "Modular Monolith API - Documentation",
+}));
 
 // 🔹 Generate token automatically on first visit
 app.use(csrfTokenMiddleware);
