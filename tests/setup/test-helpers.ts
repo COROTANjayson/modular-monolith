@@ -78,14 +78,14 @@ export const createAuthenticatedUser = async (
   const refreshTokenExpiry = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 
   const accessToken = jwt.sign(
-    { userId: user.id, email: user.email },
+    { id: user.id, email: user.email },
     accessTokenSecret,
     { expiresIn: accessTokenExpiry } as jwt.SignOptions
   );
 
   const tokenId = randomUUID();
   const refreshToken = jwt.sign(
-    { userId: user.id, jti: tokenId },
+    { id: user.id, jti: tokenId },
     refreshTokenSecret,
     { expiresIn: refreshTokenExpiry } as jwt.SignOptions
   );
@@ -116,7 +116,7 @@ export const createAuthenticatedUser = async (
 export const generateTestToken = (userId: string, email: string): string => {
   const secret = process.env.JWT_ACCESS_TOKEN_SECRET || 'test-secret';
   return jwt.sign(
-    { userId, email },
+    { id: userId, email },
     secret,
     { expiresIn: '1h' } as jwt.SignOptions
   );

@@ -20,7 +20,7 @@ export function authMiddleware(
   const token = auth.slice(7);
   try {
     const payload: any = jwt.verify(token, ACCESS_SECRET);
-    (req as any).userId = payload.userId;
+    (req as any).userId = payload.id;
     next();
   } catch (err) {
     return res.status(401).json({ error: "Invalid token" });
