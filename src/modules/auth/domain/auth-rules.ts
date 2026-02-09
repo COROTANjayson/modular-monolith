@@ -16,7 +16,7 @@ export class AuthRules {
     if (!expiresAt) return true;
     return expiresAt < new Date();
   }
-  static canLogin(user: { password: string }): {
+  static canLogin(user: { password: string | null }): {
     allowed: boolean;
     reason?: string;
   } {

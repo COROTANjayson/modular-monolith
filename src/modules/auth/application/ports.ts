@@ -19,6 +19,7 @@ export interface IAuthUserRepository {
   findById(id: string): Promise<AuthUser | null>;
   findByEmail(email: string): Promise<AuthUser | null>;
   findByVerificationToken(token: string): Promise<AuthUser | null>;
+  findByGoogleId(googleId: string): Promise<AuthUser | null>;
 }
 
 /**

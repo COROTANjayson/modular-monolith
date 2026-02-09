@@ -32,4 +32,10 @@ export class PrismaAuthUserRepository implements IAuthUserRepository {
       where: { verificationToken: token },
     }) as Promise<AuthUser | null>;
   }
+
+  async findByGoogleId(googleId: string): Promise<AuthUser | null> {
+    return prisma.user.findUnique({
+      where: { googleId },
+    }) as Promise<AuthUser | null>;
+  }
 }

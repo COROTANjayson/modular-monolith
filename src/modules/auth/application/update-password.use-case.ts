@@ -22,6 +22,15 @@ export class UpdatePasswordUseCase {
       );
     }
 
+    // Check if user has a password (Google-only accounts don't)
+    if (!user.password) {
+      throw new AppError(
+        "This account uses Google Sign-In and does not have a password. Password changes are not available for Google accounts.",
+        400,
+        AUTH_ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+      );
+    }
+
     // Verify old password if provided
     if (input.oldPassword) {
       if (input.oldPassword === input.newPassword) {

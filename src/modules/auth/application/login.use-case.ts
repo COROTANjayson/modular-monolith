@@ -22,6 +22,15 @@ export class LoginUseCase {
       );
     }
 
+    // Check if user has a password (Google-only accounts don't)
+    if (!user.password) {
+      throw new AppError(
+        "This account uses Google Sign-In. Please sign in with Google.",
+        401,
+        AUTH_ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+      );
+    }
+
     // Check domain rules
     const canLogin = AuthRules.canLogin(user);
     if (!canLogin.allowed) {
