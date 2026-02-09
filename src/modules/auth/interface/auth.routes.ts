@@ -7,6 +7,8 @@ import { Router } from "express";
 import { AuthController } from "./auth.controller";
 import { authMiddleware } from "./auth.middleware";
 
+import passport from "passport";
+
 export function createAuthRouter(controller: AuthController): Router {
   const router = Router();
 
@@ -19,6 +21,21 @@ export function createAuthRouter(controller: AuthController): Router {
     controller.resendVerification.bind(controller),
   );
   router.post("/logout", controller.logout.bind(controller));
+
+  // Google Auth Routes
+  router.get(
+    "/google",
+    passport.authenticate("google", { scope: ["profile", "email"], session: false })
+  );
+
+  router.get(
+    "/google/callback",
+    passport.authenticate("google", {
+      failureRedirect: "/api/auth/login", // Or frontend failure page
+      session: false,
+    }),
+    controller.googleCallback.bind(controller)
+  );
 
   // Protected routes
   router.patch(

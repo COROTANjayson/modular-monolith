@@ -15,6 +15,7 @@ import {
 } from "./middlewares/csrfMiddleware";
 import { logger } from "./shared/infra/logger";
 import { CLIENT_URL } from "./shared/utils/config";
+import { configurePassport } from "./shared/infra/passport";
 // import csrf from 'csurf';
 // https://chatgpt.com/c/68eb9870-0f28-8321-89fb-b3f88308208d <- csrf
 const app = express();
@@ -59,6 +60,9 @@ app.use(csrfTokenMiddleware);
 app.get("/csrf-token", (req, res) => {
   res.json({ message: "CSRF token set in cookie" });
 });
+
+// Initialize Passport
+configurePassport(app);
 
 // Initialize auth module
 const { router: authRouter } = createAuthModule();

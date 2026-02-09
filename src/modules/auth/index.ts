@@ -20,6 +20,8 @@ import { LogoutUseCase } from "./application/logout.use-case";
 import { VerifyEmailUseCase } from "./application/verify-email.use-case";
 import { ResendVerificationUseCase } from "./application/resend-verification.use-case";
 import { UpdatePasswordUseCase } from "./application/update-password.use-case";
+import { FindOrCreateGoogleUserUseCase } from "./application/find-or-create-google-user.use-case";
+import { GoogleStrategyAdapter } from "./infrastructure/google.strategy";
 
 // Interface
 import { AuthController } from "./interface/auth.controller";
@@ -56,6 +58,14 @@ export function createAuthModule(): { router: Router } {
     userRepo,
     passwordHasher,
   );
+
+  const findOrCreateGoogleUserUseCase = new FindOrCreateGoogleUserUseCase(
+    userRepo,
+    tokenGenerator
+  );
+  
+  // Initialize Google Strategy (registers itself with Passport)
+  new GoogleStrategyAdapter(findOrCreateGoogleUserUseCase);
 
   // Controller (interface layer)
   const controller = new AuthController(

@@ -26,6 +26,7 @@ import {
   COOKIE_SECURE,
   CSRF_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
+  CLIENT_URL,
 } from "../../../shared/utils/config";
 import { logger } from "../../../shared/infra/logger";
 
@@ -344,6 +345,36 @@ export class AuthController {
         userId: (req as any).userId,
       });
       return errorResponse(res, 500, "Internal server error", err);
+    }
+  }
+
+  async googleCallback(req: Request, res: Response) {
+    try {
+      const { user, accessToken, refreshToken } = req.user as any;
+      const csrfToken = generateCsrfToken();
+
+      res.cookie(REFRESH_COOKIE_NAME, refreshToken, {
+        httpOnly: true,
+        secure: COOKIE_SECURE,
+        domain: COOKIE_DOMAIN,
+        sameSite: COOKIE_SAME_SITE,
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      });
+      
+      res.cookie(CSRF_COOKIE_NAME, csrfToken, {
+        httpOnly: false,
+        sameSite: COOKIE_SAME_SITE, // Must match what frontend expects
+        secure: COOKIE_SECURE,
+      });
+
+      // Redirect to frontend dashboard
+      logger.info("Google login successful, redirecting to frontend", {
+        userId: user.id,
+      });
+      return res.redirect(`${CLIENT_URL}/dashboard`);
+    } catch (error) {
+       logger.error("Google callback failed", error);
+       return res.redirect(`${CLIENT_URL}/login?error=google_auth_failed`);
     }
   }
 }
