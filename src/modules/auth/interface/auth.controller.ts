@@ -367,6 +367,39 @@ export class AuthController {
         secure: COOKIE_SECURE,
       });
 
+      // Set Access Token (Visible to Client JS)
+      res.cookie("accessToken", accessToken, {
+        httpOnly: false, // Allow client JS to read/remove on logout
+        secure: COOKIE_SECURE,
+        domain: COOKIE_DOMAIN,
+        sameSite: COOKIE_SAME_SITE,
+        maxAge: 1000 * 60 * 60 * 24, // 1 day
+      });
+
+      // Set User Data (Visible to Client JS)
+      // Extract only safe fields, effectively stripping sensitive data if any
+      const userCookieData = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        age: user.age,
+        gender: user.gender,
+        avatar: user.avatar,
+        googleId: user.googleId,
+        isVerified: user.isVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+
+      res.cookie("user", JSON.stringify(userCookieData), {
+        httpOnly: false,
+        secure: COOKIE_SECURE,
+        domain: COOKIE_DOMAIN,
+        sameSite: COOKIE_SAME_SITE,
+        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+      });
+
       // Redirect to frontend dashboard
       logger.info("Google login successful, redirecting to frontend", {
         userId: user.id,

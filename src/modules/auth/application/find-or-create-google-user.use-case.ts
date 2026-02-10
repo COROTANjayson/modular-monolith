@@ -57,6 +57,8 @@ export class FindOrCreateGoogleUserUseCase {
 
         user = await this.userRepo.create({
           email: profile.email,
+          firstName: profile.firstName,
+          lastName: profile.lastName,
           googleId: profile.googleId,
           avatar: profile.avatar,
           isVerified: true,

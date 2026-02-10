@@ -19,7 +19,7 @@ export const CSRF_COOKIE_NAME = process.env.CSRF_COOKIE_NAME || "csrf_token";
 export const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN;
 export const COOKIE_SECURE = process.env.COOKIE_SECURE === "true" || false;
 export const COOKIE_SAME_SITE =
-  (process.env.COOKIE_SAME_SITE as "none" | "lax" | "strict") || "none";
+  (process.env.COOKIE_SAME_SITE as "none" | "lax" | "strict") || "lax";
 export const CSRF_SECRET = process.env.CSRF_SECRET || "csrf-secret-key";
 
 export const RESEND_API_KEY = process.env.RESEND_API_KEY;

@@ -5,6 +5,8 @@
 
 export interface AuthUser {
   id: string;
+  firstName: string | null; // Added
+  lastName: string | null;  // Added
   email: string;
   password: string | null; // Made optional
   googleId: string | null; // Added
@@ -19,6 +21,8 @@ export interface AuthUser {
 
 export interface AuthUserCreateData {
   email: string;
+  firstName?: string; // Added
+  lastName?: string;  // Added
   password?: string; // Made optional
   googleId?: string; // Added
   avatar?: string;   // Added
