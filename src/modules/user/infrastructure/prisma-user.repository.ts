@@ -17,6 +17,7 @@ export class PrismaUserRepository implements IUserRepository {
         lastName: true,
         age: true,
         gender: true,
+        avatar: true,
         createdAt: true,
         updatedAt: true,
       },
