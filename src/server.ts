@@ -1,10 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import app from "./app";
+import http from "http";
+import app, { notificationGateway } from "./app";
 import { startEmailWorker, closeEmailWorker } from "./workers/email.worker";
 import { closeEmailQueue } from "./queues/email.queue";
 import { closeRedis } from "./shared/infra/redis";
+import { initializeWebSocket, closeWebSocket } from "./shared/infra/websocket";
 
 import { logger } from "./shared/infra/logger";
 
@@ -13,7 +15,16 @@ const port = process.env.PORT || 3000;
 // Start the email worker
 startEmailWorker();
 
-const server = app.listen(port, () => {
+// Create HTTP server (needed for Socket.IO to attach)
+const httpServer = http.createServer(app);
+
+// Initialize Socket.IO on the HTTP server
+initializeWebSocket(httpServer);
+
+// Initialize WebSocket gateways (after Socket.IO is ready)
+notificationGateway.initialize();
+
+const server = httpServer.listen(port, () => {
   logger.info(`Server listening on http://localhost:${port}`);
 });
 
@@ -26,6 +37,8 @@ const gracefulShutdown = async (signal: string) => {
     logger.info("HTTP server closed");
 
     try {
+      // Close WebSocket
+      await closeWebSocket();
       // Close email worker and queue
       await closeEmailWorker();
       await closeEmailQueue();
@@ -49,3 +62,4 @@ const gracefulShutdown = async (signal: string) => {
 // Listen for termination signals
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+

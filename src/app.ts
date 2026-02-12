@@ -7,6 +7,7 @@ import { swaggerOptions } from "./shared/config/swagger.config";
 import { createAuthModule } from "./modules/auth";
 import { createUserModule } from "./modules/user";
 import { createOrganizationModule } from "./modules/organization";
+import { createNotificationModule } from "./modules/notification";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import {
@@ -73,6 +74,13 @@ app.use("/api/v1/users", userRouter);
 
 const { router: orgRouter } = createOrganizationModule();
 app.use("/api/v1/organizations", orgRouter);
+
+const { router: notificationRouter, notificationGateway } =
+  createNotificationModule();
+app.use("/api/v1/notifications", notificationRouter);
+
+// Export gateway for server.ts to initialize after Socket.IO is ready
+export { notificationGateway };
 
 // Auto-issue CSRF token cookie if missing
 app.use(csrfTokenMiddleware);
