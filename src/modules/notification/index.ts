@@ -8,6 +8,7 @@ import { NotificationService } from "./application/notification.service";
 import { NotificationController } from "./interface/notification.controller";
 import { createNotificationRouter } from "./interface/notification.routes";
 import { NotificationGateway } from "./interface/notification.gateway";
+import { registerNotificationListeners } from "./interface/listeners";
 
 export function createNotificationModule(): {
   router: Router;
@@ -26,6 +27,9 @@ export function createNotificationModule(): {
 
   // Interface - WebSocket
   const notificationGateway = new NotificationGateway(notificationService);
+
+  // Register Event Listeners
+  registerNotificationListeners(notificationService);
 
   return { router, notificationService, notificationGateway };
 }

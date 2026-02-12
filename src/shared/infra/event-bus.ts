@@ -13,9 +13,7 @@ import { EventEmitter } from "events";
 
 export interface AppEvents {
   "notification.created": [payload: { id: string; userId: string; type: string; title: string; message: string; metadata?: any }];
-  // Future events can be added here:
-  // "order.created": [payload: { orderId: string; userId: string }];
-  // "member.invited": [payload: { orgId: string; email: string }];
+  "member.invited": [payload: { organizationId: string; organizationName: string; inviterId: string; email: string; role: string; targetUserId?: string; token: string }];
 }
 
 class EventBus {

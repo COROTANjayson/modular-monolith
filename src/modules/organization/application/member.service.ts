@@ -17,6 +17,7 @@ import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
 import { ORG_ERROR_CODES } from "../interface/organization.response-codes";
 import { v4 as uuidv4 } from "uuid";
+import { eventBus } from "../../../shared/infra/event-bus";
 
 export class MemberService {
   constructor(
@@ -103,7 +104,7 @@ export class MemberService {
     expiresAt.setDate(expiresAt.getDate() + 1); // 1 days expiry
 
 
-    return this.memberRepository.createInvitation({
+    const invitation = await this.memberRepository.createInvitation({
       organizationId,
       inviterId,
       email: data.email,
@@ -111,6 +112,19 @@ export class MemberService {
       token,
       expiresAt,
     });
+
+    // Emit invitation event
+    eventBus.emit("member.invited", {
+      organizationId,
+      organizationName: organization.name,
+      inviterId,
+      email: data.email,
+      role: data.role,
+      targetUserId: userToInvite?.id,
+      token,
+    });
+
+    return invitation;
   }
 
   async acceptInvitation(token: string, userId: string): Promise<void> {
