@@ -32,6 +32,7 @@ export const clearDatabase = async (): Promise<void> => {
 
   // Get all table names from Prisma schema
   const tables = [
+    'Notification',
     'OrganizationInvitation',
     'OrganizationMember',
     'Organization',
