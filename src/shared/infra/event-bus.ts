@@ -12,8 +12,38 @@
 import { EventEmitter } from "events";
 
 export interface AppEvents {
-  "notification.created": [payload: { id: string; userId: string; type: string; title: string; message: string; metadata?: any }];
-  "member.invited": [payload: { organizationId: string; organizationName: string; inviterId: string; email: string; role: string; targetUserId?: string; token: string }];
+  "notification.created": [
+    payload: {
+      id: string;
+      userId: string;
+      type: string;
+      title: string;
+      message: string;
+      metadata?: any;
+    },
+  ];
+  "notification.read": [
+    payload: {
+      notificationId: string;
+      userId: string;
+    },
+  ];
+  "notification.all_read": [
+    payload: {
+      userId: string;
+    },
+  ];
+  "member.invited": [
+    payload: {
+      organizationId: string;
+      organizationName: string;
+      inviterId: string;
+      email: string;
+      role: string;
+      targetUserId?: string;
+      token: string;
+    },
+  ];
 }
 
 class EventBus {

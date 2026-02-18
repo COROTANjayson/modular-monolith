@@ -48,35 +48,9 @@ export class NotificationGateway {
         // Send initial unread count
         this.sendUnreadCount(userId);
 
-        // Handle client events
-        socket.on("mark-as-read", async (data: { notificationId: string }) => {
-          try {
-            await this.notificationService.markAsRead(
-              data.notificationId,
-              userId,
-            );
-            socket.emit("notification-read", {
-              notificationId: data.notificationId,
-            });
-            this.sendUnreadCount(userId);
-          } catch (err) {
-            socket.emit("error", { message: "Failed to mark as read" });
-          }
-        });
-
-        socket.on("mark-all-read", async () => {
-          try {
-            await this.notificationService.markAllAsRead(userId);
-            socket.emit("all-notifications-read");
-            this.sendUnreadCount(userId);
-          } catch (err) {
-            socket.emit("error", { message: "Failed to mark all as read" });
-          }
-        });
-
         socket.on("disconnect", () => {
           logger.info(
-            `[Notification WS] User ${userId} disconnected (socket: ${socket.id})`,
+            `[Notification WS] User ${userId} disconnected (socket: ${socket.id})`
           );
         });
       });
@@ -89,6 +63,30 @@ export class NotificationGateway {
             .emit("new-notification", payload);
 
           // Also update unread count
+          this.sendUnreadCount(payload.userId);
+        }
+      });
+
+      // Listen for notification read events (triggered by API calls)
+      eventBus.on("notification.read", (payload) => {
+        if (this.namespace) {
+          // Notify client to update specific notification state if needed
+          this.namespace
+            .to(`user:${payload.userId}`)
+            .emit("notification-read", { notificationId: payload.notificationId });
+
+          // Update unread count
+          this.sendUnreadCount(payload.userId);
+        }
+      });
+
+      eventBus.on("notification.all_read", (payload) => {
+        if (this.namespace) {
+          this.namespace
+            .to(`user:${payload.userId}`)
+            .emit("all-notifications-read");
+
+          // Update unread count (should be 0)
           this.sendUnreadCount(payload.userId);
         }
       });

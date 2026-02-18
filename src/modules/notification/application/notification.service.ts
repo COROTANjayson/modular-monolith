@@ -94,7 +94,15 @@ export class NotificationService {
       );
     }
 
-    return this.notificationRepo.markAsRead(id);
+    const updatedNotification = await this.notificationRepo.markAsRead(id);
+
+    // Emit event for real-time updates (e.g. sync other tabs)
+    eventBus.emit("notification.read", {
+      notificationId: id,
+      userId,
+    });
+
+    return updatedNotification;
   }
 
   /**
@@ -102,6 +110,11 @@ export class NotificationService {
    */
   async markAllAsRead(userId: string): Promise<void> {
     await this.notificationRepo.markAllAsRead(userId);
+
+    // Emit event for real-time updates
+    eventBus.emit("notification.all_read", {
+      userId,
+    });
   }
 
   /**
