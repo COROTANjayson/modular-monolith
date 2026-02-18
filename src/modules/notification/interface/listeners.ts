@@ -20,10 +20,13 @@ export function registerNotificationListeners(
           message: `You have been invited to join ${payload.organizationName} as ${payload.role}`,
           metadata: {
             organizationId: payload.organizationId,
+            organizationName: payload.organizationName,
             role: payload.role,
             email: payload.email,
             inviterId: payload.inviterId,
             token: payload.token,
+            inviteUrl: payload.inviteUrl,
+            actionUrl: payload.inviteUrl,
           },
         });
       }

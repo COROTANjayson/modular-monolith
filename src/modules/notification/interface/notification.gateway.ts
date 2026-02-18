@@ -67,6 +67,8 @@ export class NotificationGateway {
         }
       });
 
+
+
       // Listen for notification read events (triggered by API calls)
       eventBus.on("notification.read", (payload) => {
         if (this.namespace) {

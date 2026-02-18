@@ -122,6 +122,7 @@ export class MemberService {
       role: data.role,
       targetUserId: userToInvite?.id,
       token,
+      inviteUrl: `${process.env.CLIENT_URL}/invites/accept?token=${token}`,
     });
 
     return invitation;
@@ -184,6 +185,53 @@ export class MemberService {
       role: invitation.role,
       status: OrganizationMemberStatus.ACTIVE,
     });
+  }
+
+  async getInvitationByToken(token: string): Promise<{
+    invitation: OrganizationInvitation;
+    organization: { name: string };
+    inviter: { name: string; email: string };
+  }> {
+    const invitation =
+      await this.memberRepository.findInvitationByToken(token);
+
+    if (!invitation) {
+      throw new AppError(
+        "Invalid or expired invitation token",
+        404,
+        ORG_ERROR_CODES.ORG_INVITATION_INVALID,
+      );
+    }
+
+    if (invitation.expiresAt < new Date()) {
+      throw new AppError(
+        "Invitation expired",
+        400,
+        ORG_ERROR_CODES.ORG_INVITATION_EXPIRED,
+      );
+    }
+
+    const organization =
+      await this.organizationRepository.findById(invitation.organizationId);
+
+    if (!organization) {
+      throw new AppError(
+        "Organization not found",
+        404,
+        ORG_ERROR_CODES.ORG_NOT_FOUND,
+      );
+    }
+
+    const inviter = await this.userRepository.findById(invitation.inviterId);
+
+    return {
+      invitation,
+      organization: { name: organization.name },
+      inviter: {
+        name: inviter ? `${inviter.firstName} ${inviter.lastName}` : "Unknown",
+        email: inviter ? inviter.email : "",
+      },
+    };
   }
 
   async listMembers(

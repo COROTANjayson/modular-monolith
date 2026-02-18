@@ -42,6 +42,7 @@ export interface AppEvents {
       role: string;
       targetUserId?: string;
       token: string;
+      inviteUrl: string;
     },
   ];
 }

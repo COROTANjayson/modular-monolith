@@ -19,6 +19,9 @@ export function createMemberRouter(memberController: MemberController): Router {
   router.post("/invitations/:token/accept", (req, res) =>
     memberController.acceptInvitation(req, res),
   );
+  router.get("/invitations/:token", (req, res) =>
+    memberController.getInvitation(req, res),
+  );
   router.delete("/:id/invitations/:invitationId", (req, res) =>
     memberController.revokeInvitation(req, res),
   );
