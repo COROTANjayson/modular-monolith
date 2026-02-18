@@ -28,6 +28,8 @@ model User {
 
     organizationMembers OrganizationMember[]
     notifications       Notification[]
+    teamMembers         TeamMember[]
+    teamsLed            Team[] @relation("TeamLeader")
 }
 
 model Organization {
@@ -41,6 +43,7 @@ model Organization {
 
     members     OrganizationMember[]
     invitations OrganizationInvitation[]
+    teams       Team[]
 }
 
 model OrganizationMember {
@@ -75,9 +78,38 @@ model OrganizationInvitation {
     organization Organization @relation(fields: [organizationId], references: [id])
 }
 
+model Team {
+    id             String   @id @default(cuid())
+    organizationId String
+    name           String
+    description    String?
+    leaderId       String
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+
+    organization Organization @relation(fields: [organizationId], references: [id])
+    leader       User         @relation("TeamLeader", fields: [leaderId], references: [id]) // Virtual relation for leader
+    members      TeamMember[]
+
+    @@unique([organizationId, name])
+}
+
+model TeamMember {
+    id        String   @id @default(cuid())
+    teamId    String
+    userId    String
+    joinedAt  DateTime @default(now())
+
+    team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([teamId, userId])
+}
+
 enum OrganizationRole {
     owner
     admin
+    team_lead
     member
 }
 

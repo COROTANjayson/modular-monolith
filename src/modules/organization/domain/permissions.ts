@@ -14,6 +14,11 @@ export enum OrganizationPermission {
   MEMBER_UPDATE_ROLE = "member:update-role",
   MEMBER_UPDATE_STATUS = "member:update-status",
   MEMBER_REMOVE = "member:remove",
+
+  TEAM_CREATE = "team:create",
+  TEAM_UPDATE = "team:update",
+  TEAM_DELETE = "team:delete",
+  TEAM_READ = "team:read",
 }
 
 const ROLE_PERMISSIONS: Record<OrganizationRole, OrganizationPermission[]> = {
@@ -27,6 +32,10 @@ const ROLE_PERMISSIONS: Record<OrganizationRole, OrganizationPermission[]> = {
     OrganizationPermission.MEMBER_UPDATE_ROLE,
     OrganizationPermission.MEMBER_UPDATE_STATUS,
     OrganizationPermission.MEMBER_REMOVE,
+    OrganizationPermission.TEAM_CREATE,
+    OrganizationPermission.TEAM_UPDATE,
+    OrganizationPermission.TEAM_DELETE,
+    OrganizationPermission.TEAM_READ,
   ],
   [OrganizationRole.ADMIN]: [
     OrganizationPermission.ORG_READ,
@@ -37,10 +46,22 @@ const ROLE_PERMISSIONS: Record<OrganizationRole, OrganizationPermission[]> = {
     OrganizationPermission.MEMBER_UPDATE_ROLE,
     OrganizationPermission.MEMBER_UPDATE_STATUS,
     OrganizationPermission.MEMBER_REMOVE,
+    OrganizationPermission.TEAM_CREATE,
+    OrganizationPermission.TEAM_UPDATE,
+    OrganizationPermission.TEAM_DELETE,
+    OrganizationPermission.TEAM_READ,
+  ],
+  [OrganizationRole.TEAM_LEAD]: [
+    OrganizationPermission.ORG_READ,
+    OrganizationPermission.MEMBER_LIST,
+    OrganizationPermission.TEAM_CREATE,
+    OrganizationPermission.TEAM_UPDATE,
+    OrganizationPermission.TEAM_READ,
   ],
   [OrganizationRole.MEMBER]: [
     OrganizationPermission.ORG_READ,
     OrganizationPermission.MEMBER_LIST,
+    OrganizationPermission.TEAM_READ,
   ],
 };
 

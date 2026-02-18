@@ -12,12 +12,16 @@ import { MemberController } from "./interface/member.controller";
 import { createOrganizationRouter } from "./interface/organization.routes";
 
 import { PrismaMemberRepository } from "./infrastructure/prisma-member.repository";
+import { PrismaTeamRepository } from "./infrastructure/prisma-team.repository";
+import { TeamService } from "./application/team.service";
+import { TeamController } from "./interface/team.controller";
 import { createMemberRouter } from "./interface/member.routes";
 
 export function createOrganizationModule(): { router: Router } {
   // Infrastructure
   const organizationRepo = new PrismaOrganizationRepository();
   const memberRepo = new PrismaMemberRepository();
+  const teamRepo = new PrismaTeamRepository();
   const userRepo = new PrismaUserRepository();
 
   // Application
@@ -30,16 +34,18 @@ export function createOrganizationModule(): { router: Router } {
     memberRepo,
     userRepo,
   );
+  const teamService = new TeamService(teamRepo, memberRepo);
 
   // Interface
   const organizationController = new OrganizationController(
     organizationService,
   );
   const memberController = new MemberController(memberService);
+  const teamController = new TeamController(teamService);
 
   // Router
   const router = Router();
-  router.use("/", createOrganizationRouter(organizationController));
+  router.use("/", createOrganizationRouter(organizationController, teamController));
   router.use("/", createMemberRouter(memberController));
 
   return { router };
