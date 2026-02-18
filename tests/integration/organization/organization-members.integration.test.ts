@@ -44,8 +44,9 @@ describe('Organization Members Integration', () => {
       const { accessToken: memberToken, user: newMember } = await createAuthenticatedUser({ email: inviteEmail });
       
       await request(app)
-        .post(`/api/v1/organizations/invitations/${invitation!.token}/accept`)
+        .post(`/api/v1/organizations/invites/accept`)
         .set('Authorization', `Bearer ${memberToken}`)
+        .send({ token: invitation!.token })
         .expect(200);
 
       // Verify member added

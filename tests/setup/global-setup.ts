@@ -20,7 +20,7 @@ export default async function globalSetup() {
   try {
     // Run Prisma migrations on test database
     console.log('🔄 Running Prisma migrations...');
-    execSync('npx prisma migrate deploy', {
+    execSync('npx prisma db push --accept-data-loss --skip-generate', {
       stdio: 'inherit',
       env: {
         ...process.env,
