@@ -156,6 +156,19 @@ export class MemberService {
         ORG_ERROR_CODES.ORG_INVITATION_INVALID,
       );
     }
+    
+    // Check if user is already a member
+    const existingMember = await this.memberRepository.findMember(
+      invitation.organizationId,
+      userId,
+    );
+    if (existingMember) {
+        throw new AppError(
+            "User is already a member of this organization",
+            400,
+            ORG_ERROR_CODES.ORG_ALREADY_MEMBER,
+        );
+    }
 
     if (invitation.acceptedAt) {
       throw new AppError(
@@ -187,10 +200,14 @@ export class MemberService {
     });
   }
 
-  async getInvitationByToken(token: string): Promise<{
+  async getInvitationByToken(
+    token: string,
+    userId?: string,
+  ): Promise<{
     invitation: OrganizationInvitation;
     organization: { name: string };
     inviter: { name: string; email: string };
+    isExistingMember: boolean;
   }> {
     const invitation =
       await this.memberRepository.findInvitationByToken(token);
@@ -224,6 +241,14 @@ export class MemberService {
 
     const inviter = await this.userRepository.findById(invitation.inviterId);
 
+    let isExistingMember = false;
+    if (userId) {
+        const member = await this.memberRepository.findMember(invitation.organizationId, userId);
+        if (member) {
+            isExistingMember = true;
+        }
+    }
+
     return {
       invitation,
       organization: { name: organization.name },
@@ -231,6 +256,7 @@ export class MemberService {
         name: inviter ? `${inviter.firstName} ${inviter.lastName}` : "Unknown",
         email: inviter ? inviter.email : "",
       },
+      isExistingMember,
     };
   }
 

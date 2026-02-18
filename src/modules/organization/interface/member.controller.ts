@@ -89,7 +89,8 @@ export class MemberController {
   async getInvitation(req: Request, res: Response) {
     try {
       const { token } = req.params;
-      const result = await this.memberService.getInvitationByToken(token);
+      const userId = (req as any).userId;
+      const result = await this.memberService.getInvitationByToken(token, userId);
       return successResponse(
         res,
         result,
