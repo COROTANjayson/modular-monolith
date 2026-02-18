@@ -23,6 +23,7 @@ export class PrismaNotificationRepository implements INotificationRepository {
         message: data.message,
         metadata:
           data.metadata === null ? Prisma.JsonNull : data.metadata ?? undefined,
+        redirectUrl: data.redirectUrl,
       },
     })) as unknown as Notification;
   }

@@ -20,6 +20,7 @@ export interface AppEvents {
       title: string;
       message: string;
       metadata?: any;
+      redirectUrl?: string;
     },
   ];
   "notification.read": [

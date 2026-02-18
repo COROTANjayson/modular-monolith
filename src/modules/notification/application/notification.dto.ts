@@ -8,6 +8,7 @@ export interface CreateNotificationDto {
   title: string;
   message: string;
   metadata?: Record<string, any>;
+  redirectUrl?: string;
 }
 
 export interface NotificationListQueryDto {

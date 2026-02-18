@@ -61,7 +61,7 @@ export class MemberController {
   async acceptInvitation(req: Request, res: Response) {
     try {
       const userId = (req as any).userId;
-      const { token } = req.params;
+      const { token } = req.body;
       const validatedData = validate(acceptInvitationSchema, { token });
 
       await this.memberService.acceptInvitation(validatedData.token, userId);

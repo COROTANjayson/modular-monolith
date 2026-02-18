@@ -30,6 +30,7 @@ export class NotificationService {
       title: dto.title,
       message: dto.message,
       metadata: dto.metadata || null,
+      redirectUrl: dto.redirectUrl,
     });
 
     // Emit event for WebSocket gateway to push in real-time
@@ -40,6 +41,7 @@ export class NotificationService {
       title: notification.title,
       message: notification.message,
       metadata: notification.metadata,
+      redirectUrl: notification.redirectUrl,
     });
 
     return notification;

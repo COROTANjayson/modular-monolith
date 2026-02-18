@@ -18,6 +18,7 @@ export function registerNotificationListeners(
           type: "MEMBER_INVITE",
           title: "Organization Invitation",
           message: `You have been invited to join ${payload.organizationName} as ${payload.role}`,
+          redirectUrl: payload.inviteUrl,
           metadata: {
             organizationId: payload.organizationId,
             organizationName: payload.organizationName,
@@ -25,8 +26,6 @@ export function registerNotificationListeners(
             email: payload.email,
             inviterId: payload.inviterId,
             token: payload.token,
-            inviteUrl: payload.inviteUrl,
-            actionUrl: payload.inviteUrl,
           },
         });
       }

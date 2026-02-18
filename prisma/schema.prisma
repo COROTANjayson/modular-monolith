@@ -94,7 +94,8 @@ model Notification {
     type      String
     title     String
     message   String
-    metadata  Json?
+    metadata    Json?
+    redirectUrl String?
     isRead    Boolean   @default(false)
     readAt    DateTime?
     createdAt DateTime  @default(now())

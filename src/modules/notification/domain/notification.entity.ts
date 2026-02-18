@@ -9,6 +9,7 @@ export interface Notification {
   title: string;
   message: string;
   metadata: Record<string, any> | null;
+  redirectUrl?: string;
   isRead: boolean;
   readAt: Date | null;
   createdAt: Date;
