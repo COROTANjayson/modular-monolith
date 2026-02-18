@@ -220,7 +220,7 @@
 
 /**
  * @openapi
- * /api/v1/organizations/invitations/{token}/accept:
+ * /api/v1/organizations/invites/accept:
  *   post:
  *     tags:
  *       - Organization Members
@@ -228,15 +228,12 @@
  *     description: Accepts an invitation to join an organization using the invitation token
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - name: token
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: Invitation token
- *         example: "990e8400-e29b-41d4-a716-446655440000"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AcceptInvitationInput'
  *     responses:
  *       200:
  *         description: Invitation accepted successfully
@@ -292,6 +289,69 @@
  *               code: ORG_INVITATION_EXPIRED
  *               message: Invitation has expired
  *               errors: null
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+
+/**
+ * @openapi
+ * /api/v1/organizations/invites/{token}:
+ *   get:
+ *     tags:
+ *       - Organization Members
+ *     summary: Get invitation details
+ *     description: Retrieves details of an invitation by token.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: token
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Invitation token
+ *         example: "990e8400-e29b-41d4-a716-446655440000"
+ *     responses:
+ *       200:
+ *         description: Invitation details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 code:
+ *                   type: string
+ *                   example: FETCHED
+ *                 message:
+ *                   type: string
+ *                   example: Invitation details retrieved
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     invitation:
+ *                       $ref: '#/components/schemas/OrganizationInvitation'
+ *                     organization:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                     inviter:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *       404:
+ *         description: Invitation not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
