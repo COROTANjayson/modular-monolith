@@ -21,6 +21,7 @@ export function createOrganizationRouter(
   router.post("/", (req, res) => orgController.create(req, res));
   
   // Team Management
+  router.get("/:organizationId/teams/mine", (req, res, next) => teamController.getMyTeams(req, res, next));
   router.post("/:organizationId/teams", (req, res, next) => teamController.createTeam(req, res, next));
   router.get("/:organizationId/teams", (req, res, next) => teamController.getTeams(req, res, next));
   router.get("/:organizationId/teams/:teamId", (req, res, next) => teamController.getTeam(req, res, next));
@@ -28,6 +29,7 @@ export function createOrganizationRouter(
   router.get("/:organizationId/teams/:teamId/members", (req, res, next) => teamController.getTeamMembers(req, res, next));
   router.post("/:organizationId/teams/:teamId/members", (req, res, next) => teamController.addMember(req, res, next));
   router.delete("/:organizationId/teams/:teamId/members/:userId", (req, res, next) => teamController.removeMember(req, res, next));
+  router.get("/:organizationId/teams/mine", (req, res, next) => teamController.getMyTeams(req, res, next));
 
   router.get("/:id", (req, res) => orgController.getById(req, res));
   router.patch("/:id", (req, res) => orgController.update(req, res));

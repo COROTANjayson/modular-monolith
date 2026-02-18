@@ -178,4 +178,33 @@ export class PrismaTeamRepository implements ITeamRepository {
       });
       return team?.leaderId === userId;
   }
+
+  async findTeamsByMember(userId: string, organizationId: string): Promise<Team[]> {
+    const teams = await prisma.team.findMany({
+      where: {
+        organizationId,
+        members: {
+          some: {
+            userId
+          }
+        }
+      },
+      include: {
+        leader: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+          }
+        },
+        _count: {
+          select: { members: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    return teams as unknown as Team[];
+  }
 }

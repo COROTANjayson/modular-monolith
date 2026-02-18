@@ -185,4 +185,8 @@ export class TeamService {
       // I will allow listing all teams for now.
       return await this.teamRepo.findByOrganizationId(organizationId);
   }
+
+  async getMyTeams(organizationId: string, userId: string): Promise<Team[]> {
+      return await this.teamRepo.findTeamsByMember(userId, organizationId);
+  }
 }

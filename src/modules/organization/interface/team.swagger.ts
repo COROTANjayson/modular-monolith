@@ -351,5 +351,29 @@
  *         description: Member removed successfully
  *       403:
  *         $ref: '#/components/responses/ForbiddenError'
+ *
+ * /api/v1/organizations/{organizationId}/teams/mine:
+ *   get:
+ *     tags:
+ *       - Teams
+ *     summary: Get list of teams current user belongs to
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: organizationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     responses:
+ *       200:
+ *         description: List of teams user belongs to
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Team'
  */
 export {};

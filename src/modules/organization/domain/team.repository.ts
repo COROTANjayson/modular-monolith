@@ -11,4 +11,5 @@ export interface ITeamRepository {
   findMember(teamId: string, userId: string): Promise<TeamMember | null>;
   getMembers(teamId: string): Promise<TeamMember[]>;
   isLeader(teamId: string, userId: string): Promise<boolean>;
+  findTeamsByMember(userId: string, organizationId: string): Promise<Team[]>;
 }

@@ -98,6 +98,19 @@ export class TeamController {
       next(error);
     }
   };
+
+  getMyTeams = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { organizationId } = req.params;
+      const userId = (req as any).userId; // Helper ensures this is present
+      
+      const teams = await this.teamService.getMyTeams(organizationId, userId);
+
+      res.status(200).json(teams);
+    } catch (error) {
+        next(error);
+    }
+  };
   
   getTeamMembers = async (req: Request, res: Response, next: NextFunction) => {
       try {

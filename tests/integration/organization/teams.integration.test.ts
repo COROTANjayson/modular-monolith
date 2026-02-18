@@ -157,5 +157,43 @@ describe('Teams Feature Integration', () => {
                 .send({ name: 'Hacked Name' })
                 .expect(500); // Expect generic error for permission denied
         });
+
+        it('should get list of teams user belongs to (mine)', async () => {
+             const userA = await createAuthenticatedUser();
+             const userB = await createAuthenticatedUser(); // Create second user for other teams
+             
+             const org = await prisma.organization.create({
+                 data: {
+                     name: 'Org Teams List', slug: 'org-teams-list', ownerId: userA.user.id,
+                     members: { create: { userId: userA.user.id, role: 'owner', status: 'active' } }
+                 }
+             });
+
+             // Team 1: User A is leader (member implicitly)
+             await prisma.team.create({
+                 data: { organizationId: org.id, name: 'Team Alpha', leaderId: userA.user.id, members: { create: { userId: userA.user.id } } }
+             });
+
+             // Team 2: User A is member, User B is leader
+             await prisma.team.create({
+                 data: { organizationId: org.id, name: 'Team Beta', leaderId: userB.user.id, members: { create: { userId: userA.user.id } } }
+             });
+
+             // Team 3: User A is NOT member, User B is leader
+             await prisma.team.create({
+                 data: { organizationId: org.id, name: 'Team Gamma', leaderId: userB.user.id }
+             });
+
+             const res = await request(app)
+                .get(`/api/v1/organizations/${org.id}/teams/mine`)
+                .set('Authorization', `Bearer ${userA.accessToken}`)
+                .expect(200);
+
+             expect(res.body).toHaveLength(2);
+             const teamNames = res.body.map((t: any) => t.name);
+             expect(teamNames).toContain('Team Alpha');
+             expect(teamNames).toContain('Team Beta');
+             expect(teamNames).not.toContain('Team Gamma');
+        });
     });
 });
