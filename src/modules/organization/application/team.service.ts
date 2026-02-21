@@ -1,7 +1,11 @@
+/**
+ * Application Layer - Team Service
+ */
 
 import { ITeamRepository } from "../domain/team.repository";
 import { IMemberRepository } from "../domain/member.repository";
 import { Team, TeamMember } from "../domain/team.entity";
+import { CreateTeamDto, UpdateTeamDto } from "./team.dto";
 import { OrganizationRole } from "../domain/member.entity";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
@@ -33,7 +37,7 @@ export class TeamService {
   async createTeam(
     organizationId: string,
     userId: string,
-    data: { name: string; description?: string }
+    data: CreateTeamDto
   ): Promise<Team> {
     const role = await this.getMemberRole(organizationId, userId);
     
@@ -61,7 +65,7 @@ export class TeamService {
     organizationId: string,
     userId: string,
     teamId: string,
-    data: { name?: string; description?: string }
+    data: UpdateTeamDto
   ): Promise<Team> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 

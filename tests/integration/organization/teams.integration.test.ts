@@ -38,10 +38,12 @@ describe('Teams Feature Integration', () => {
                 .send({ name: 'Alpha Team', description: 'The A Team' })
                 .expect(201);
 
-            expect(res.body.name).toBe('Alpha Team');
-            expect(res.body.leaderId).toBe(user.id);
+            expect(res.body.success).toBe(true);
+            expect(res.body.code).toBe('TEAM_CREATED');
+            expect(res.body.data.name).toBe('Alpha Team');
+            expect(res.body.data.leaderId).toBe(user.id);
             
-            const dbTeam = await prisma.team.findUnique({ where: { id: res.body.id } });
+            const dbTeam = await prisma.team.findUnique({ where: { id: res.body.data.id } });
             expect(dbTeam).toBeTruthy();
         });
 
@@ -54,11 +56,14 @@ describe('Teams Feature Integration', () => {
                 }
             });
 
-            await request(app)
+            const res = await request(app)
                 .post(`/api/v1/organizations/${org.id}/teams`)
                 .set('Authorization', `Bearer ${accessToken}`)
                 .send({ name: 'Beta Team' })
                 .expect(201);
+
+            expect(res.body.success).toBe(true);
+            expect(res.body.code).toBe('TEAM_CREATED');
         });
 
         it('should allow Team Lead to create a team', async () => {
@@ -70,11 +75,14 @@ describe('Teams Feature Integration', () => {
                }
            });
 
-           await request(app)
+           const res = await request(app)
                .post(`/api/v1/organizations/${org.id}/teams`)
                .set('Authorization', `Bearer ${accessToken}`)
                .send({ name: 'Charlie Team' })
                .expect(201);
+
+           expect(res.body.success).toBe(true);
+           expect(res.body.code).toBe('TEAM_CREATED');
         });
 
         it('should NOT allow Member to create a team', async () => {
@@ -86,11 +94,14 @@ describe('Teams Feature Integration', () => {
                }
            });
 
-           await request(app)
+           const res = await request(app)
                .post(`/api/v1/organizations/${org.id}/teams`)
                .set('Authorization', `Bearer ${accessToken}`)
                .send({ name: 'Delta Team' })
-               .expect(500); // Or 403 if error handler maps strictly, but currently throws generic Error -> 500 usually
+               .expect(403);
+
+           expect(res.body.success).toBe(false);
+           expect(res.body.code).toBe('ERROR_FORBIDDEN');
         });
     });
 
@@ -116,7 +127,9 @@ describe('Teams Feature Integration', () => {
                 .set('Authorization', `Bearer ${accessToken}`)
                 .expect(200);
 
-            expect(res.body).toHaveLength(2);
+            expect(res.body.success).toBe(true);
+            expect(res.body.code).toBe('TEAMS_FETCHED');
+            expect(res.body.data).toHaveLength(2);
         });
 
         it('should restrict update to Team Leader', async () => {
@@ -144,23 +157,30 @@ describe('Teams Feature Integration', () => {
              });
 
              // User A (Leader) updates -> Success
-             await request(app)
+             const successRes = await request(app)
                 .patch(`/api/v1/organizations/${org.id}/teams/${team.id}`)
                 .set('Authorization', `Bearer ${userA.accessToken}`)
                 .send({ name: 'Updated Name' })
                 .expect(200);
 
-            // User B (Admin but not leader) updates -> Fail
-            await request(app)
+            expect(successRes.body.success).toBe(true);
+            expect(successRes.body.code).toBe('TEAM_UPDATED');
+            expect(successRes.body.data.name).toBe('Updated Name');
+
+            // User B (Admin but not leader) updates -> Fail with 403
+            const failRes = await request(app)
                 .patch(`/api/v1/organizations/${org.id}/teams/${team.id}`)
                 .set('Authorization', `Bearer ${userB.accessToken}`)
                 .send({ name: 'Hacked Name' })
-                .expect(500); // Expect generic error for permission denied
+                .expect(403);
+
+            expect(failRes.body.success).toBe(false);
+            expect(failRes.body.code).toBe('ERROR_FORBIDDEN');
         });
 
         it('should get list of teams user belongs to (mine)', async () => {
              const userA = await createAuthenticatedUser();
-             const userB = await createAuthenticatedUser(); // Create second user for other teams
+             const userB = await createAuthenticatedUser();
              
              const org = await prisma.organization.create({
                  data: {
@@ -189,8 +209,10 @@ describe('Teams Feature Integration', () => {
                 .set('Authorization', `Bearer ${userA.accessToken}`)
                 .expect(200);
 
-             expect(res.body).toHaveLength(2);
-             const teamNames = res.body.map((t: any) => t.name);
+             expect(res.body.success).toBe(true);
+             expect(res.body.code).toBe('MY_TEAMS_FETCHED');
+             expect(res.body.data).toHaveLength(2);
+             const teamNames = res.body.data.map((t: any) => t.name);
              expect(teamNames).toContain('Team Alpha');
              expect(teamNames).toContain('Team Beta');
              expect(teamNames).not.toContain('Team Gamma');

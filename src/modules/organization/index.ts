@@ -16,6 +16,7 @@ import { PrismaTeamRepository } from "./infrastructure/prisma-team.repository";
 import { TeamService } from "./application/team.service";
 import { TeamController } from "./interface/team.controller";
 import { createMemberRouter } from "./interface/member.routes";
+import { createTeamRouter } from "./interface/team.routes";
 
 export function createOrganizationModule(): { router: Router } {
   // Infrastructure
@@ -45,8 +46,9 @@ export function createOrganizationModule(): { router: Router } {
 
   // Router
   const router = Router();
-  router.use("/", createOrganizationRouter(organizationController, teamController));
+  router.use("/", createOrganizationRouter(organizationController));
   router.use("/", createMemberRouter(memberController));
+  router.use("/", createTeamRouter(teamController));
 
   return { router };
 }

@@ -1,3 +1,6 @@
+/**
+ * Interface Layer - Team Controller
+ */
 
 import { Request, Response, NextFunction } from "express";
 import { TeamService } from "../application/team.service";
@@ -5,7 +8,13 @@ import {
   successResponse,
   errorResponse,
 } from "../../../shared/utils/response.util";
+import { validate } from "../../../shared/utils/validate";
 import { AppError } from "../../../shared/utils/app-error";
+import {
+  createTeamSchema,
+  updateTeamSchema,
+  addTeamMemberSchema,
+} from "./team.validation";
 import { ORG_SUCCESS_CODES } from "./organization.response-codes";
 
 export class TeamController {
@@ -15,12 +24,13 @@ export class TeamController {
     try {
       const { organizationId } = req.params;
       const userId = (req as any).userId;
-      const { name, description } = req.body;
+      const validatedData = validate(createTeamSchema, req.body);
 
-      const team = await this.teamService.createTeam(organizationId, userId, {
-        name,
-        description,
-      });
+      const team = await this.teamService.createTeam(
+        organizationId,
+        userId,
+        validatedData,
+      );
 
       return successResponse(
         res,
@@ -41,13 +51,13 @@ export class TeamController {
     try {
       const { organizationId, teamId } = req.params;
       const userId = (req as any).userId;
-      const { name, description } = req.body;
+      const validatedData = validate(updateTeamSchema, req.body);
 
       const team = await this.teamService.updateTeam(
         organizationId,
         userId,
         teamId,
-        { name, description }
+        validatedData,
       );
 
       return successResponse(
@@ -69,13 +79,13 @@ export class TeamController {
     try {
       const { organizationId, teamId } = req.params;
       const actorId = (req as any).userId;
-      const { userId } = req.body;
+      const validatedData = validate(addTeamMemberSchema, req.body);
 
       const member = await this.teamService.addMember(
         organizationId,
         actorId,
         teamId,
-        userId
+        validatedData.userId,
       );
 
       return successResponse(

@@ -1,5 +1,8 @@
 /**
  * Team Module - Swagger/OpenAPI Documentation
+ *
+ * All response codes and schemas are aligned with ARCHITECTURE_GUIDE.md standards.
+ * Responses follow the standard envelope: { success, code, message, data/errors }
  */
 
 /**
@@ -55,7 +58,7 @@
  *           properties:
  *             members:
  *               type: integer
- * 
+ *
  *     CreateTeamInput:
  *       type: object
  *       required:
@@ -68,7 +71,7 @@
  *         description:
  *           type: string
  *           maxLength: 255
- * 
+ *
  *     UpdateTeamInput:
  *       type: object
  *       properties:
@@ -79,7 +82,16 @@
  *         description:
  *           type: string
  *           maxLength: 255
- * 
+ *
+ *     AddTeamMemberInput:
+ *       type: object
+ *       required:
+ *         - userId
+ *       properties:
+ *         userId:
+ *           type: string
+ *           format: uuid
+ *
  *     TeamMember:
  *       type: object
  *       properties:
@@ -120,6 +132,7 @@
  *     tags:
  *       - Teams
  *     summary: Create a new team
+ *     description: Creates a new team within the organization. Only OWNER, ADMIN, or TEAM_LEAD roles can create teams. The creator becomes the team leader automatically.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -129,6 +142,7 @@
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Organization ID
  *     requestBody:
  *       required: true
  *       content:
@@ -146,6 +160,12 @@
  *                 success:
  *                   type: boolean
  *                   example: true
+ *                 code:
+ *                   type: string
+ *                   example: TEAM_CREATED
+ *                 message:
+ *                   type: string
+ *                   example: Team created successfully
  *                 data:
  *                   $ref: '#/components/schemas/Team'
  *       400:
@@ -153,12 +173,24 @@
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       403:
- *         $ref: '#/components/responses/ForbiddenError'
- * 
+ *         description: Forbidden - Insufficient permissions to create a team
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: ERROR_FORBIDDEN
+ *               message: Insufficient permissions to create a team
+ *               errors: null
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ *
  *   get:
  *     tags:
  *       - Teams
- *     summary: List teams in an organization
+ *     summary: List all teams in an organization
+ *     description: Retrieves all teams within the specified organization.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -168,15 +200,77 @@
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Organization ID
  *     responses:
  *       200:
  *         description: Teams retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Team'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 code:
+ *                   type: string
+ *                   example: TEAMS_FETCHED
+ *                 message:
+ *                   type: string
+ *                   example: Teams retrieved successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Team'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+
+/**
+ * @openapi
+ * /api/v1/organizations/{organizationId}/teams/mine:
+ *   get:
+ *     tags:
+ *       - Teams
+ *     summary: Get my teams
+ *     description: Retrieves all teams that the authenticated user belongs to within the specified organization.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: organizationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Organization ID
+ *     responses:
+ *       200:
+ *         description: Your teams retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 code:
+ *                   type: string
+ *                   example: MY_TEAMS_FETCHED
+ *                 message:
+ *                   type: string
+ *                   example: Your teams retrieved successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Team'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -186,6 +280,7 @@
  *     tags:
  *       - Teams
  *     summary: Get team details
+ *     description: Retrieves details for a specific team. User must be a member of the team, the team leader, or an organization admin/owner.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -195,26 +290,65 @@
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Organization ID
  *       - in: path
  *         name: teamId
  *         required: true
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Team ID
  *     responses:
  *       200:
- *         description: Team details retrieved successfully
+ *         description: Team retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Team'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 code:
+ *                   type: string
+ *                   example: TEAM_FETCHED
+ *                 message:
+ *                   type: string
+ *                   example: Team retrieved successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Team'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         description: Forbidden - User is not a member of this team
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: ERROR_FORBIDDEN
+ *               message: Access denied. You must be a member of the team or an admin to view details
+ *               errors: null
  *       404:
- *         $ref: '#/components/responses/NotFoundError'
- * 
+ *         description: Team not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: TEAM_NOT_FOUND
+ *               message: Team not found
+ *               errors: null
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ *
  *   patch:
  *     tags:
  *       - Teams
  *     summary: Update team details
+ *     description: Updates a team's name and/or description. Only the team leader can update team details.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -224,12 +358,14 @@
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Organization ID
  *       - in: path
  *         name: teamId
  *         required: true
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Team ID
  *     requestBody:
  *       required: true
  *       content:
@@ -242,9 +378,45 @@
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Team'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 code:
+ *                   type: string
+ *                   example: TEAM_UPDATED
+ *                 message:
+ *                   type: string
+ *                   example: Team updated successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Team'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       403:
- *         $ref: '#/components/responses/ForbiddenError'
+ *         description: Forbidden - Only the team leader can update team details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: ERROR_FORBIDDEN
+ *               message: Only the team leader can update team details
+ *               errors: null
+ *       404:
+ *         description: Team not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: TEAM_NOT_FOUND
+ *               message: Team not found
+ *               errors: null
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**
@@ -254,6 +426,7 @@
  *     tags:
  *       - Teams
  *     summary: List team members
+ *     description: Retrieves all members of a specific team. Accessible to any organization member.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -263,26 +436,56 @@
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Organization ID
  *       - in: path
  *         name: teamId
  *         required: true
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Team ID
  *     responses:
  *       200:
  *         description: Team members retrieved successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/TeamMember'
- * 
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 code:
+ *                   type: string
+ *                   example: TEAM_MEMBERS_FETCHED
+ *                 message:
+ *                   type: string
+ *                   example: Team members retrieved successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/TeamMember'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         description: Team not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: TEAM_NOT_FOUND
+ *               message: Team not found
+ *               errors: null
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ *
  *   post:
  *     tags:
  *       - Teams
  *     summary: Add member to team
+ *     description: Adds a user to a team. Only OWNER, ADMIN, or the team leader can add members. The target user must be an organization member.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -292,39 +495,97 @@
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Organization ID
  *       - in: path
  *         name: teamId
  *         required: true
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Team ID
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - userId
- *             properties:
- *               userId:
- *                 type: string
- *                 format: uuid
+ *             $ref: '#/components/schemas/AddTeamMemberInput'
  *     responses:
  *       201:
- *         description: Member added successfully
+ *         description: Member added to team successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/TeamMember'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 code:
+ *                   type: string
+ *                   example: TEAM_MEMBER_ADDED
+ *                 message:
+ *                   type: string
+ *                   example: Member added to team successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/TeamMember'
  *       400:
- *         description: User not found or already in team
- * 
+ *         description: Bad request - User is not a member of the organization
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: ERROR_BAD_REQUEST
+ *               message: User is not a member of the organization
+ *               errors: null
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         description: Forbidden - Insufficient permissions to add members
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: ERROR_FORBIDDEN
+ *               message: Insufficient permissions to add members to this team
+ *               errors: null
+ *       404:
+ *         description: Team not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: TEAM_NOT_FOUND
+ *               message: Team not found
+ *               errors: null
+ *       409:
+ *         description: Conflict - User is already a member of this team
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: TEAM_MEMBER_ALREADY_EXISTS
+ *               message: User is already a member of this team
+ *               errors: null
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+
+/**
+ * @openapi
  * /api/v1/organizations/{organizationId}/teams/{teamId}/members/{userId}:
  *   delete:
  *     tags:
  *       - Teams
  *     summary: Remove member from team
+ *     description: Removes a user from a team. Only OWNER, ADMIN, or the team leader can remove members. The team leader cannot be removed.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -334,46 +595,79 @@
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Organization ID
  *       - in: path
  *         name: teamId
  *         required: true
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: Team ID
  *       - in: path
  *         name: userId
  *         required: true
  *         schema:
  *           type: string
  *           format: uuid
+ *         description: ID of the user to remove
  *     responses:
  *       204:
- *         description: Member removed successfully
- *       403:
- *         $ref: '#/components/responses/ForbiddenError'
- *
- * /api/v1/organizations/{organizationId}/teams/mine:
- *   get:
- *     tags:
- *       - Teams
- *     summary: Get list of teams current user belongs to
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: organizationId
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     responses:
- *       200:
- *         description: List of teams user belongs to
+ *         description: Member removed from team successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Team'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 code:
+ *                   type: string
+ *                   example: TEAM_MEMBER_REMOVED
+ *                 message:
+ *                   type: string
+ *                   example: Member removed from team successfully
+ *                 data:
+ *                   type: "null"
+ *                   example: null
+ *       400:
+ *         description: Bad request - Cannot remove the team leader
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: ERROR_BAD_REQUEST
+ *               message: Cannot remove the team leader
+ *               errors: null
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         description: Forbidden - Insufficient permissions to remove members
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: ERROR_FORBIDDEN
+ *               message: Insufficient permissions to remove members from this team
+ *               errors: null
+ *       404:
+ *         description: Team not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: TEAM_NOT_FOUND
+ *               message: Team not found
+ *               errors: null
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
+
+// Export an empty object to make this a valid module
 export {};
