@@ -79,6 +79,13 @@ export class PrismaTeamRepository implements ITeamRepository {
     return team as unknown as Team | null;
   }
 
+  async delete(id: string): Promise<void> {
+    await prisma.$transaction(async (tx) => {
+      await tx.teamMember.deleteMany({ where: { teamId: id } });
+      await tx.team.delete({ where: { id } });
+    });
+  }
+
   async findByOrganizationId(organizationId: string): Promise<Team[]> {
     const teams = await prisma.team.findMany({
       where: { organizationId },

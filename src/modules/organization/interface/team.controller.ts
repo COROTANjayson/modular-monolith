@@ -75,6 +75,28 @@ export class TeamController {
     }
   };
 
+  deleteTeam = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { organizationId, teamId } = req.params;
+      const userId = (req as any).userId;
+
+      await this.teamService.deleteTeam(organizationId, userId, teamId);
+
+      return successResponse(
+        res,
+        null,
+        200,
+        "Team deleted successfully",
+        ORG_SUCCESS_CODES.TEAM_DELETED,
+      );
+    } catch (err: any) {
+      if (err instanceof AppError) {
+        return errorResponse(res, err.statusCode, err.message, err.errors, err.code);
+      }
+      return errorResponse(res, 500, "Internal server error", err);
+    }
+  };
+
   addMembers = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { organizationId, teamId } = req.params;

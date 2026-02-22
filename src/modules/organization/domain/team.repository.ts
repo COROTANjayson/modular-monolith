@@ -4,6 +4,7 @@ import { Team, TeamMember } from "./team.entity";
 export interface ITeamRepository {
   create(team: Omit<Team, "id" | "createdAt" | "updatedAt" | "leader" | "_count">): Promise<Team>;
   update(id: string, team: Partial<Omit<Team, "id" | "createdAt" | "updatedAt" | "leader" | "_count">>): Promise<Team>;
+  delete(id: string): Promise<void>;
   findById(id: string): Promise<Team | null>;
   findByOrganizationId(organizationId: string): Promise<Team[]>;
   addMember(teamId: string, userId: string): Promise<TeamMember>;

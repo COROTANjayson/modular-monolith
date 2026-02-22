@@ -444,6 +444,75 @@
  *               errors: null
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
+ *
+ *   delete:
+ *     tags:
+ *       - Teams
+ *     summary: Delete a team
+ *     description: Permanently deletes a team and all its member associations. Only OWNER, ADMIN, or the team leader can delete the team.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: organizationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Organization ID
+ *       - in: path
+ *         name: teamId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Team ID
+ *     responses:
+ *       200:
+ *         description: Team deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 code:
+ *                   type: string
+ *                   example: TEAM_DELETED
+ *                 message:
+ *                   type: string
+ *                   example: Team deleted successfully
+ *                 data:
+ *                   type: "null"
+ *                   example: null
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         description: Forbidden - Insufficient permissions to delete this team
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: ERROR_FORBIDDEN
+ *               message: Insufficient permissions to delete this team
+ *               errors: null
+ *       404:
+ *         description: Team not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               code: TEAM_NOT_FOUND
+ *               message: Team not found
+ *               errors: null
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
  */
 
 /**

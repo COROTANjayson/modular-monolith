@@ -100,6 +100,33 @@ export class TeamService {
     return await this.teamRepo.update(teamId, data);
   }
 
+  async deleteTeam(
+    organizationId: string,
+    userId: string,
+    teamId: string,
+  ): Promise<void> {
+    const team = await this.ensureTeamExists(teamId, organizationId);
+
+    const role = await this.getMemberRole(organizationId, userId);
+    const isLeader = team.leaderId === userId;
+
+    // Only Owner, Admin, or the team leader can delete the team
+    const canDelete =
+      role === OrganizationRole.OWNER ||
+      role === OrganizationRole.ADMIN ||
+      isLeader;
+
+    if (!canDelete) {
+      throw new AppError(
+        "Insufficient permissions to delete this team",
+        403,
+        ERROR_CODES.FORBIDDEN,
+      );
+    }
+
+    await this.teamRepo.delete(teamId);
+  }
+
   async addMember(
     organizationId: string,
     actorId: string, 

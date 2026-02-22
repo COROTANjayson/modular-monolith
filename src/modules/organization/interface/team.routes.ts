@@ -30,6 +30,9 @@ export function createTeamRouter(teamController: TeamController): Router {
   router.patch("/:organizationId/teams/:teamId", (req, res, next) =>
     teamController.updateTeam(req, res, next),
   );
+  router.delete("/:organizationId/teams/:teamId", (req, res, next) =>
+    teamController.deleteTeam(req, res, next),
+  );
 
   // Team Member Management
   router.get("/:organizationId/teams/:teamId/members", (req, res, next) =>

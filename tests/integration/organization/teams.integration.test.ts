@@ -375,4 +375,104 @@ describe('Teams Feature Integration', () => {
             expect(res.body.data.skipped).toContain(existingMember.user.id);
         });
     });
+
+    describe('Delete Team', () => {
+        it('should allow Team Leader to delete their team', async () => {
+            const owner = await createAuthenticatedUser();
+            const memberA = await createAuthenticatedUser();
+
+            const org = await prisma.organization.create({
+                data: {
+                    name: 'Org Delete', slug: 'org-delete', ownerId: owner.user.id,
+                    members: {
+                        createMany: {
+                            data: [
+                                { userId: owner.user.id, role: 'owner', status: 'active' },
+                                { userId: memberA.user.id, role: 'member', status: 'active' },
+                            ]
+                        }
+                    }
+                }
+            });
+
+            const team = await prisma.team.create({
+                data: {
+                    organizationId: org.id,
+                    name: 'Team to Delete',
+                    leaderId: owner.user.id,
+                    members: { create: { userId: memberA.user.id } },
+                }
+            });
+
+            const res = await request(app)
+                .delete(`/api/v1/organizations/${org.id}/teams/${team.id}`)
+                .set('Authorization', `Bearer ${owner.accessToken}`)
+                .expect(200);
+
+            expect(res.body.success).toBe(true);
+            expect(res.body.code).toBe('TEAM_DELETED');
+
+            // Verify team is gone from DB
+            const dbTeam = await prisma.team.findUnique({ where: { id: team.id } });
+            expect(dbTeam).toBeNull();
+
+            // Verify team members are gone too
+            const dbMembers = await prisma.teamMember.findMany({ where: { teamId: team.id } });
+            expect(dbMembers).toHaveLength(0);
+        });
+
+        it('should NOT allow regular member to delete a team', async () => {
+            const owner = await createAuthenticatedUser();
+            const regularMember = await createAuthenticatedUser();
+
+            const org = await prisma.organization.create({
+                data: {
+                    name: 'Org No Delete', slug: 'org-no-delete', ownerId: owner.user.id,
+                    members: {
+                        createMany: {
+                            data: [
+                                { userId: owner.user.id, role: 'owner', status: 'active' },
+                                { userId: regularMember.user.id, role: 'member', status: 'active' },
+                            ]
+                        }
+                    }
+                }
+            });
+
+            const team = await prisma.team.create({
+                data: { organizationId: org.id, name: 'Protected Team', leaderId: owner.user.id }
+            });
+
+            const res = await request(app)
+                .delete(`/api/v1/organizations/${org.id}/teams/${team.id}`)
+                .set('Authorization', `Bearer ${regularMember.accessToken}`)
+                .expect(403);
+
+            expect(res.body.success).toBe(false);
+            expect(res.body.code).toBe('ERROR_FORBIDDEN');
+
+            // Verify team still exists
+            const dbTeam = await prisma.team.findUnique({ where: { id: team.id } });
+            expect(dbTeam).toBeTruthy();
+        });
+
+        it('should return 404 for non-existent team', async () => {
+            const owner = await createAuthenticatedUser();
+
+            const org = await prisma.organization.create({
+                data: {
+                    name: 'Org 404', slug: 'org-404', ownerId: owner.user.id,
+                    members: { create: { userId: owner.user.id, role: 'owner', status: 'active' } }
+                }
+            });
+
+            const res = await request(app)
+                .delete(`/api/v1/organizations/${org.id}/teams/non-existent-id`)
+                .set('Authorization', `Bearer ${owner.accessToken}`)
+                .expect(404);
+
+            expect(res.body.success).toBe(false);
+            expect(res.body.code).toBe('TEAM_NOT_FOUND');
+        });
+    });
 });
