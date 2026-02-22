@@ -71,6 +71,13 @@
  *         description:
  *           type: string
  *           maxLength: 255
+ *         memberIds:
+ *           type: array
+ *           description: Optional list of user IDs to add as initial team members
+ *           maxItems: 50
+ *           items:
+ *             type: string
+ *             format: uuid
  *
  *     UpdateTeamInput:
  *       type: object
@@ -83,14 +90,34 @@
  *           type: string
  *           maxLength: 255
  *
- *     AddTeamMemberInput:
+ *     AddTeamMembersInput:
  *       type: object
  *       required:
- *         - userId
+ *         - userIds
  *       properties:
- *         userId:
- *           type: string
- *           format: uuid
+ *         userIds:
+ *           type: array
+ *           description: List of user IDs to add to the team
+ *           minItems: 1
+ *           maxItems: 50
+ *           items:
+ *             type: string
+ *             format: uuid
+ *
+ *     AddTeamMembersResult:
+ *       type: object
+ *       properties:
+ *         added:
+ *           type: array
+ *           description: Members that were successfully added
+ *           items:
+ *             $ref: '#/components/schemas/TeamMember'
+ *         skipped:
+ *           type: array
+ *           description: User IDs that were skipped (already members or not in org)
+ *           items:
+ *             type: string
+ *             format: uuid
  *
  *     TeamMember:
  *       type: object
@@ -484,8 +511,8 @@
  *   post:
  *     tags:
  *       - Teams
- *     summary: Add member to team
- *     description: Adds a user to a team. Only OWNER, ADMIN, or the team leader can add members. The target user must be an organization member.
+ *     summary: Add members to team (bulk)
+ *     description: Adds one or more users to a team. Only OWNER, ADMIN, or the team leader can add members. Target users must be organization members. Duplicates and non-org members are skipped.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -508,10 +535,10 @@
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/AddTeamMemberInput'
+ *             $ref: '#/components/schemas/AddTeamMembersInput'
  *     responses:
  *       201:
- *         description: Member added to team successfully
+ *         description: Members added to team successfully
  *         content:
  *           application/json:
  *             schema:
@@ -522,23 +549,14 @@
  *                   example: true
  *                 code:
  *                   type: string
- *                   example: TEAM_MEMBER_ADDED
+ *                   example: TEAM_MEMBERS_ADDED
  *                 message:
  *                   type: string
- *                   example: Member added to team successfully
+ *                   example: Members added to team successfully
  *                 data:
- *                   $ref: '#/components/schemas/TeamMember'
+ *                   $ref: '#/components/schemas/AddTeamMembersResult'
  *       400:
- *         description: Bad request - User is not a member of the organization
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               code: ERROR_BAD_REQUEST
- *               message: User is not a member of the organization
- *               errors: null
+ *         $ref: '#/components/responses/ValidationError'
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       403:
@@ -562,17 +580,6 @@
  *               success: false
  *               code: TEAM_NOT_FOUND
  *               message: Team not found
- *               errors: null
- *       409:
- *         description: Conflict - User is already a member of this team
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
- *             example:
- *               success: false
- *               code: TEAM_MEMBER_ALREADY_EXISTS
- *               message: User is already a member of this team
  *               errors: null
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
