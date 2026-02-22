@@ -218,4 +218,161 @@ describe('Teams Feature Integration', () => {
              expect(teamNames).not.toContain('Team Gamma');
         });
     });
+
+    describe('Bulk Member Operations', () => {
+        it('should create a team with initial members', async () => {
+            const owner = await createAuthenticatedUser();
+            const memberA = await createAuthenticatedUser();
+            const memberB = await createAuthenticatedUser();
+
+            const org = await prisma.organization.create({
+                data: {
+                    name: 'Org Bulk Create', slug: 'org-bulk-create', ownerId: owner.user.id,
+                    members: {
+                        createMany: {
+                            data: [
+                                { userId: owner.user.id, role: 'owner', status: 'active' },
+                                { userId: memberA.user.id, role: 'member', status: 'active' },
+                                { userId: memberB.user.id, role: 'member', status: 'active' },
+                            ]
+                        }
+                    }
+                }
+            });
+
+            const res = await request(app)
+                .post(`/api/v1/organizations/${org.id}/teams`)
+                .set('Authorization', `Bearer ${owner.accessToken}`)
+                .send({
+                    name: 'Bulk Team',
+                    description: 'Created with members',
+                    memberIds: [memberA.user.id, memberB.user.id],
+                })
+                .expect(201);
+
+            expect(res.body.success).toBe(true);
+            expect(res.body.code).toBe('TEAM_CREATED');
+            expect(res.body.data.name).toBe('Bulk Team');
+
+            // Verify members were added in DB
+            const dbMembers = await prisma.teamMember.findMany({
+                where: { teamId: res.body.data.id },
+            });
+            const memberUserIds = dbMembers.map((m: any) => m.userId);
+            expect(memberUserIds).toContain(memberA.user.id);
+            expect(memberUserIds).toContain(memberB.user.id);
+        });
+
+        it('should bulk add members to an existing team', async () => {
+            const owner = await createAuthenticatedUser();
+            const memberA = await createAuthenticatedUser();
+            const memberB = await createAuthenticatedUser();
+
+            const org = await prisma.organization.create({
+                data: {
+                    name: 'Org Bulk Add', slug: 'org-bulk-add', ownerId: owner.user.id,
+                    members: {
+                        createMany: {
+                            data: [
+                                { userId: owner.user.id, role: 'owner', status: 'active' },
+                                { userId: memberA.user.id, role: 'member', status: 'active' },
+                                { userId: memberB.user.id, role: 'member', status: 'active' },
+                            ]
+                        }
+                    }
+                }
+            });
+
+            const team = await prisma.team.create({
+                data: { organizationId: org.id, name: 'Existing Team', leaderId: owner.user.id }
+            });
+
+            const res = await request(app)
+                .post(`/api/v1/organizations/${org.id}/teams/${team.id}/members`)
+                .set('Authorization', `Bearer ${owner.accessToken}`)
+                .send({ userIds: [memberA.user.id, memberB.user.id] })
+                .expect(201);
+
+            expect(res.body.success).toBe(true);
+            expect(res.body.code).toBe('TEAM_MEMBERS_ADDED');
+            expect(res.body.data.added).toHaveLength(2);
+            expect(res.body.data.skipped).toHaveLength(0);
+        });
+
+        it('should NOT allow regular member to bulk add members', async () => {
+            const owner = await createAuthenticatedUser();
+            const regularMember = await createAuthenticatedUser();
+            const targetUser = await createAuthenticatedUser();
+
+            const org = await prisma.organization.create({
+                data: {
+                    name: 'Org Perm Check', slug: 'org-perm-check', ownerId: owner.user.id,
+                    members: {
+                        createMany: {
+                            data: [
+                                { userId: owner.user.id, role: 'owner', status: 'active' },
+                                { userId: regularMember.user.id, role: 'member', status: 'active' },
+                                { userId: targetUser.user.id, role: 'member', status: 'active' },
+                            ]
+                        }
+                    }
+                }
+            });
+
+            const team = await prisma.team.create({
+                data: { organizationId: org.id, name: 'Restricted Team', leaderId: owner.user.id }
+            });
+
+            const res = await request(app)
+                .post(`/api/v1/organizations/${org.id}/teams/${team.id}/members`)
+                .set('Authorization', `Bearer ${regularMember.accessToken}`)
+                .send({ userIds: [targetUser.user.id] })
+                .expect(403);
+
+            expect(res.body.success).toBe(false);
+            expect(res.body.code).toBe('ERROR_FORBIDDEN');
+        });
+
+        it('should skip already-existing team members in bulk add', async () => {
+            const owner = await createAuthenticatedUser();
+            const existingMember = await createAuthenticatedUser();
+            const newMember = await createAuthenticatedUser();
+
+            const org = await prisma.organization.create({
+                data: {
+                    name: 'Org Skip Test', slug: 'org-skip-test', ownerId: owner.user.id,
+                    members: {
+                        createMany: {
+                            data: [
+                                { userId: owner.user.id, role: 'owner', status: 'active' },
+                                { userId: existingMember.user.id, role: 'member', status: 'active' },
+                                { userId: newMember.user.id, role: 'member', status: 'active' },
+                            ]
+                        }
+                    }
+                }
+            });
+
+            const team = await prisma.team.create({
+                data: {
+                    organizationId: org.id,
+                    name: 'Skip Team',
+                    leaderId: owner.user.id,
+                    members: { create: { userId: existingMember.user.id } },
+                }
+            });
+
+            const res = await request(app)
+                .post(`/api/v1/organizations/${org.id}/teams/${team.id}/members`)
+                .set('Authorization', `Bearer ${owner.accessToken}`)
+                .send({ userIds: [existingMember.user.id, newMember.user.id] })
+                .expect(201);
+
+            expect(res.body.success).toBe(true);
+            expect(res.body.code).toBe('TEAM_MEMBERS_ADDED');
+            expect(res.body.data.added).toHaveLength(1);
+            expect(res.body.data.skipped).toHaveLength(1);
+            expect(res.body.data.skipped).toContain(existingMember.user.id);
+        });
+    });
 });
