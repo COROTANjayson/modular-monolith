@@ -5,6 +5,7 @@
 export interface CreateTeamDto {
   name: string;
   description?: string;
+  memberIds?: string[];
 }
 
 export interface UpdateTeamDto {
@@ -12,6 +13,6 @@ export interface UpdateTeamDto {
   description?: string;
 }
 
-export interface AddTeamMemberDto {
-  userId: string;
+export interface AddTeamMembersDto {
+  userIds: string[];
 }

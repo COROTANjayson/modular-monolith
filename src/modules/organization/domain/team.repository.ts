@@ -7,6 +7,7 @@ export interface ITeamRepository {
   findById(id: string): Promise<Team | null>;
   findByOrganizationId(organizationId: string): Promise<Team[]>;
   addMember(teamId: string, userId: string): Promise<TeamMember>;
+  addMembers(teamId: string, userIds: string[]): Promise<TeamMember[]>;
   removeMember(teamId: string, userId: string): Promise<void>;
   findMember(teamId: string, userId: string): Promise<TeamMember | null>;
   getMembers(teamId: string): Promise<TeamMember[]>;

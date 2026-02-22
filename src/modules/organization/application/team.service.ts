@@ -5,7 +5,7 @@
 import { ITeamRepository } from "../domain/team.repository";
 import { IMemberRepository } from "../domain/member.repository";
 import { Team, TeamMember } from "../domain/team.entity";
-import { CreateTeamDto, UpdateTeamDto } from "./team.dto";
+import { CreateTeamDto, UpdateTeamDto, AddTeamMembersDto } from "./team.dto";
 import { OrganizationRole } from "../domain/member.entity";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
@@ -58,7 +58,26 @@ export class TeamService {
       leaderId: userId,
     });
 
-    return team;
+    // Add initial members if provided
+    if (data.memberIds && data.memberIds.length > 0) {
+      // Filter out the leader (already added) and validate org membership
+      const memberIdsToAdd = data.memberIds.filter((id) => id !== userId);
+      if (memberIdsToAdd.length > 0) {
+        const validUserIds: string[] = [];
+        for (const memberId of memberIdsToAdd) {
+          const orgMember = await this.memberRepo.findMember(organizationId, memberId);
+          if (orgMember) {
+            validUserIds.push(memberId);
+          }
+        }
+        if (validUserIds.length > 0) {
+          await this.teamRepo.addMembers(team.id, validUserIds);
+        }
+      }
+    }
+
+    // Re-fetch to get updated member count
+    return await this.teamRepo.findById(team.id) as Team;
   }
 
   async updateTeam(
@@ -127,6 +146,59 @@ export class TeamService {
     }
 
     return await this.teamRepo.addMember(teamId, targetUserId);
+  }
+
+  async addMembers(
+    organizationId: string,
+    actorId: string,
+    teamId: string,
+    userIds: string[]
+  ): Promise<{ added: TeamMember[]; skipped: string[] }> {
+    const team = await this.ensureTeamExists(teamId, organizationId);
+
+    const actorRole = await this.getMemberRole(organizationId, actorId);
+    const isLeader = team.leaderId === actorId;
+
+    const canAdd =
+      actorRole === OrganizationRole.OWNER ||
+      actorRole === OrganizationRole.ADMIN ||
+      (actorRole === OrganizationRole.TEAM_LEAD && isLeader);
+
+    if (!canAdd) {
+      throw new AppError(
+        "Insufficient permissions to add members to this team",
+        403,
+        ERROR_CODES.FORBIDDEN,
+      );
+    }
+
+    const validUserIds: string[] = [];
+    const skipped: string[] = [];
+
+    for (const userId of userIds) {
+      // Check org membership
+      const orgMember = await this.memberRepo.findMember(organizationId, userId);
+      if (!orgMember) {
+        skipped.push(userId);
+        continue;
+      }
+
+      // Check if already in team
+      const existingTeamMember = await this.teamRepo.findMember(teamId, userId);
+      if (existingTeamMember) {
+        skipped.push(userId);
+        continue;
+      }
+
+      validUserIds.push(userId);
+    }
+
+    let added: TeamMember[] = [];
+    if (validUserIds.length > 0) {
+      added = await this.teamRepo.addMembers(teamId, validUserIds);
+    }
+
+    return { added, skipped };
   }
 
   async removeMember(

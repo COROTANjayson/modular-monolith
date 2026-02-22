@@ -122,6 +122,36 @@ export class PrismaTeamRepository implements ITeamRepository {
     return member as unknown as TeamMember;
   }
 
+  async addMembers(teamId: string, userIds: string[]): Promise<TeamMember[]> {
+    // Use a transaction: createMany then fetch with user includes
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.teamMember.createMany({
+        data: userIds.map((userId) => ({ teamId, userId })),
+        skipDuplicates: true,
+      });
+
+      return tx.teamMember.findMany({
+        where: {
+          teamId,
+          userId: { in: userIds },
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              avatar: true,
+            },
+          },
+        },
+      });
+    });
+
+    return result as unknown as TeamMember[];
+  }
+
   async removeMember(teamId: string, userId: string): Promise<void> {
     await prisma.teamMember.deleteMany({
       where: {

@@ -8,6 +8,7 @@ export const createTeamSchema = z
   .object({
     name: z.string().min(3).max(50),
     description: z.string().max(255).optional(),
+    memberIds: z.array(z.string().uuid()).max(50).optional(),
   })
   .strict();
 
@@ -18,8 +19,8 @@ export const updateTeamSchema = z
   })
   .strict();
 
-export const addTeamMemberSchema = z
+export const addTeamMembersSchema = z
   .object({
-    userId: z.string().uuid(),
+    userIds: z.array(z.string().uuid()).min(1).max(50),
   })
   .strict();

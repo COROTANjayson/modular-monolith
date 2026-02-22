@@ -13,7 +13,7 @@ import { AppError } from "../../../shared/utils/app-error";
 import {
   createTeamSchema,
   updateTeamSchema,
-  addTeamMemberSchema,
+  addTeamMembersSchema,
 } from "./team.validation";
 import { ORG_SUCCESS_CODES } from "./organization.response-codes";
 
@@ -75,25 +75,25 @@ export class TeamController {
     }
   };
 
-  addMember = async (req: Request, res: Response, next: NextFunction) => {
+  addMembers = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { organizationId, teamId } = req.params;
       const actorId = (req as any).userId;
-      const validatedData = validate(addTeamMemberSchema, req.body);
+      const validatedData = validate(addTeamMembersSchema, req.body);
 
-      const member = await this.teamService.addMember(
+      const result = await this.teamService.addMembers(
         organizationId,
         actorId,
         teamId,
-        validatedData.userId,
+        validatedData.userIds,
       );
 
       return successResponse(
         res,
-        member,
+        result,
         201,
-        "Member added to team successfully",
-        ORG_SUCCESS_CODES.TEAM_MEMBER_ADDED,
+        "Members added to team successfully",
+        ORG_SUCCESS_CODES.TEAM_MEMBERS_ADDED,
       );
     } catch (err: any) {
       if (err instanceof AppError) {

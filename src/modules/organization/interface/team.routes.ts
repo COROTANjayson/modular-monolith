@@ -36,7 +36,7 @@ export function createTeamRouter(teamController: TeamController): Router {
     teamController.getTeamMembers(req, res, next),
   );
   router.post("/:organizationId/teams/:teamId/members", (req, res, next) =>
-    teamController.addMember(req, res, next),
+    teamController.addMembers(req, res, next),
   );
   router.delete(
     "/:organizationId/teams/:teamId/members/:userId",
