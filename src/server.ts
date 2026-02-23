@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import http from "http";
-import app, { notificationGateway } from "./app";
+import app, { notificationGateway, chatGateway } from "./app";
 import { startEmailWorker, closeEmailWorker } from "./workers/email.worker";
 import { closeEmailQueue } from "./queues/email.queue";
 import { closeRedis } from "./shared/infra/redis";
@@ -23,6 +23,7 @@ initializeWebSocket(httpServer);
 
 // Initialize WebSocket gateways (after Socket.IO is ready)
 notificationGateway.initialize();
+chatGateway.initialize();
 
 const server = httpServer.listen(port, () => {
   logger.info(`Server listening on http://localhost:${port}`);

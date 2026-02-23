@@ -8,6 +8,7 @@ import { createAuthModule } from "./modules/auth";
 import { createUserModule } from "./modules/user";
 import { createOrganizationModule } from "./modules/organization";
 import { createNotificationModule } from "./modules/notification";
+import { createChatModule } from "./modules/chat";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import {
@@ -79,8 +80,11 @@ const { router: notificationRouter, notificationGateway } =
   createNotificationModule();
 app.use("/api/v1/notifications", notificationRouter);
 
-// Export gateway for server.ts to initialize after Socket.IO is ready
-export { notificationGateway };
+const { router: chatRouter, chatGateway } = createChatModule();
+app.use("/api/v1/chat", chatRouter);
+
+// Export gateways for server.ts to initialize after Socket.IO is ready
+export { notificationGateway, chatGateway };
 
 // Auto-issue CSRF token cookie if missing
 app.use(csrfTokenMiddleware);

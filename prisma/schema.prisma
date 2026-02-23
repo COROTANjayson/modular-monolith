@@ -30,6 +30,7 @@ model User {
     notifications       Notification[]
     teamMembers         TeamMember[]
     teamsLed            Team[] @relation("TeamLeader")
+    chatMessages        ChatMessage[] @relation("ChatMessages")
 }
 
 model Organization {
@@ -90,6 +91,7 @@ model Team {
     organization Organization @relation(fields: [organizationId], references: [id])
     leader       User         @relation("TeamLeader", fields: [leaderId], references: [id]) // Virtual relation for leader
     members      TeamMember[]
+    chatMessages ChatMessage[]
 
     @@unique([organizationId, name])
 }
@@ -135,4 +137,17 @@ model Notification {
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@index([userId, isRead, createdAt])
+}
+
+model ChatMessage {
+    id        String   @id @default(cuid())
+    teamId    String
+    senderId  String
+    content   String
+    createdAt DateTime @default(now())
+
+    team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+    sender User @relation("ChatMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+    @@index([teamId, createdAt])
 }

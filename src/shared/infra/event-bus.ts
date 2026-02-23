@@ -46,6 +46,22 @@ export interface AppEvents {
       inviteUrl: string;
     },
   ];
+  "chat.message_sent": [
+    payload: {
+      id: string;
+      teamId: string;
+      senderId: string;
+      content: string;
+      createdAt: Date;
+      sender?: {
+        id: string;
+        firstName: string | null;
+        lastName: string | null;
+        email: string;
+        avatar: string | null;
+      };
+    },
+  ];
 }
 
 class EventBus {
