@@ -34,3 +34,18 @@ export const EMAIL_QUEUE_RATE_LIMIT = process.env.EMAIL_QUEUE_RATE_LIMIT
 export const EMAIL_QUEUE_RATE_DURATION = process.env.EMAIL_QUEUE_RATE_DURATION
   ? parseInt(process.env.EMAIL_QUEUE_RATE_DURATION, 10)
   : 60000; // 1 minute (60000ms)
+
+// Storage Configuration
+export const STORAGE_PROVIDER = process.env.STORAGE_PROVIDER;
+
+// ImageKit Configuration
+export const IMAGEKIT_PUBLIC_KEY = process.env.IMAGEKIT_PUBLIC_KEY;
+export const IMAGEKIT_PRIVATE_KEY = process.env.IMAGEKIT_PRIVATE_KEY;
+export const IMAGEKIT_URL_ENDPOINT = process.env.IMAGEKIT_URL_ENDPOINT;
+
+// S3 Configuration
+export const AWS_REGION = process.env.AWS_REGION;
+export const AWS_S3_BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME;
+export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+export const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+

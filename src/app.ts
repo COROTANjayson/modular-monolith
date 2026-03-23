@@ -9,6 +9,7 @@ import { createUserModule } from "./modules/user";
 import { createOrganizationModule } from "./modules/organization";
 import { createNotificationModule } from "./modules/notification";
 import { createChatModule } from "./modules/chat";
+import { createStorageModule } from "./modules/storage";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import {
@@ -82,6 +83,9 @@ app.use("/api/v1/notifications", notificationRouter);
 
 const { router: chatRouter, chatGateway } = createChatModule();
 app.use("/api/v1/chat", chatRouter);
+
+const { router: storageRouter } = createStorageModule();
+app.use("/api/v1/storage", storageRouter);
 
 // Export gateways for server.ts to initialize after Socket.IO is ready
 export { notificationGateway, chatGateway };
