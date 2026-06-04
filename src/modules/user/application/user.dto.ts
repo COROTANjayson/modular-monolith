@@ -7,4 +7,5 @@ export interface UpdateUserDto {
   lastName?: string;
   age?: number;
   gender?: string;
+  avatar?: string;
 }

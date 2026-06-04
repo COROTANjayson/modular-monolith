@@ -10,5 +10,6 @@ export const UpdateUserSchema = z
     lastName: z.string().min(1).optional(),
     age: z.number().int().min(0).optional(),
     gender: z.string().optional(),
+    avatar: z.string().url().optional(),
   })
   .strict();
