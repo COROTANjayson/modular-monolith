@@ -7,24 +7,24 @@ import { IMemberRepository } from "../domain/member.repository";
 import {
   OrganizationMember,
   OrganizationInvitation,
-  OrganizationRole,
 } from "../domain/member.entity";
 
 export class PrismaMemberRepository implements IMemberRepository {
   async addMember(data: {
     organizationId: string;
     userId: string;
-    role: OrganizationRole;
+    roleId: string;
     status: any;
   }): Promise<OrganizationMember> {
     return (await prisma.organizationMember.create({
       data: {
         organizationId: data.organizationId,
         userId: data.userId,
-        role: data.role as any,
+        roleId: data.roleId,
         status: data.status as any,
         joinedAt: new Date(),
       },
+      include: { role: true },
     })) as unknown as OrganizationMember;
   }
 
@@ -39,6 +39,7 @@ export class PrismaMemberRepository implements IMemberRepository {
           userId,
         },
       },
+      include: { role: true },
     })) as unknown as OrganizationMember | null;
   }
 
@@ -46,6 +47,7 @@ export class PrismaMemberRepository implements IMemberRepository {
     return (await prisma.organizationMember.findMany({
       where: { organizationId },
       include: {
+        role: true,
         user: {
           select: {
             id: true,
@@ -64,8 +66,9 @@ export class PrismaMemberRepository implements IMemberRepository {
     data: Partial<OrganizationMember>,
   ): Promise<OrganizationMember> {
     const updateData: any = { ...data };
-    if (data.role) updateData.role = data.role as any;
+    if (data.roleId) updateData.roleId = data.roleId;
     if (data.status) updateData.status = data.status as any;
+    delete updateData.role; // don't try to update the relation object
 
     return (await prisma.organizationMember.update({
       where: {
@@ -75,6 +78,7 @@ export class PrismaMemberRepository implements IMemberRepository {
         },
       },
       data: updateData,
+      include: { role: true },
     })) as unknown as OrganizationMember;
   }
 
@@ -93,7 +97,7 @@ export class PrismaMemberRepository implements IMemberRepository {
     organizationId: string;
     inviterId: string;
     email: string;
-    role: OrganizationRole;
+    roleId: string;
     token: string;
     expiresAt: Date;
   }): Promise<OrganizationInvitation> {
@@ -102,10 +106,11 @@ export class PrismaMemberRepository implements IMemberRepository {
         organizationId: data.organizationId,
         inviterId: data.inviterId,
         email: data.email,
-        role: data.role as any,
+        roleId: data.roleId,
         token: data.token,
         expiresAt: data.expiresAt,
       },
+      include: { role: true },
     })) as unknown as OrganizationInvitation;
   }
 
@@ -114,6 +119,7 @@ export class PrismaMemberRepository implements IMemberRepository {
   ): Promise<OrganizationInvitation | null> {
     return (await prisma.organizationInvitation.findUnique({
       where: { token },
+      include: { role: true },
     })) as unknown as OrganizationInvitation | null;
   }
 
@@ -122,11 +128,13 @@ export class PrismaMemberRepository implements IMemberRepository {
     data: Partial<OrganizationInvitation>,
   ): Promise<OrganizationInvitation> {
     const updateData: any = { ...data };
-    if (data.role) updateData.role = data.role as any;
+    if (data.roleId) updateData.roleId = data.roleId;
+    delete updateData.role; // don't update relation object
 
     return (await prisma.organizationInvitation.update({
       where: { id },
       data: updateData,
+      include: { role: true },
     })) as unknown as OrganizationInvitation;
   }
 
@@ -139,7 +147,27 @@ export class PrismaMemberRepository implements IMemberRepository {
           gt: new Date()
         }
       },
+      include: { role: true },
     })) as unknown as OrganizationInvitation[];
+  }
+
+  async createDefaultRoles(organizationId: string): Promise<Record<string, string>> {
+    const roles = ['owner', 'admin', 'team_lead', 'member'];
+    const roleIds: Record<string, string> = {};
+
+    for (const roleName of roles) {
+      const role = await prisma.role.create({
+        data: {
+          organizationId,
+          name: roleName,
+          permissions: [],
+          isDefault: true,
+        }
+      });
+      roleIds[roleName] = role.id;
+    }
+
+    return roleIds;
   }
 
   async deleteInvitation(id: string): Promise<void> {

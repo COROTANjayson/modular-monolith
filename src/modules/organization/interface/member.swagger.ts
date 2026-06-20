@@ -8,15 +8,23 @@
 /**
  * @openapi
  * components:
- *   schemas:
- *     OrganizationRole:
- *       type: string
- *       enum:
- *         - owner
- *         - admin
- *         - member
- *       description: Member role in the organization
- *       example: member
+ *     Role:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *         organizationId:
+ *           type: string
+ *           format: uuid
+ *         name:
+ *           type: string
+ *         permissions:
+ *           type: array
+ *           items:
+ *             type: string
+ *         isDefault:
+ *           type: boolean
  * 
  *     OrganizationMemberStatus:
  *       type: string
@@ -44,8 +52,11 @@
  *           type: string
  *           format: uuid
  *           example: "660e8400-e29b-41d4-a716-446655440001"
+ *         roleId:
+ *           type: string
+ *           format: uuid
  *         role:
- *           $ref: '#/components/schemas/OrganizationRole'
+ *           $ref: '#/components/schemas/Role'
  *         status:
  *           $ref: '#/components/schemas/OrganizationMemberStatus'
  *         invitedAt:
@@ -93,8 +104,11 @@
  *           type: string
  *           format: email
  *           example: newmember@example.com
+ *         roleId:
+ *           type: string
+ *           format: uuid
  *         role:
- *           $ref: '#/components/schemas/OrganizationRole'
+ *           $ref: '#/components/schemas/Role'
  *         token:
  *           type: string
  *           format: uuid
@@ -117,23 +131,25 @@
  *       type: object
  *       required:
  *         - email
- *         - role
+ *         - roleId
  *       properties:
  *         email:
  *           type: string
  *           format: email
  *           example: newmember@example.com
  *           description: Email of the user to invite
- *         role:
- *           $ref: '#/components/schemas/OrganizationRole'
+ *         roleId:
+ *           type: string
+ *           format: uuid
  * 
  *     UpdateMemberRoleInput:
  *       type: object
  *       required:
- *         - role
+ *         - roleId
  *       properties:
- *         role:
- *           $ref: '#/components/schemas/OrganizationRole'
+ *         roleId:
+ *           type: string
+ *           format: uuid
  * 
  *     UpdateMemberStatusInput:
  *       type: object

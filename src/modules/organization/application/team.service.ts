@@ -6,7 +6,7 @@ import { ITeamRepository } from "../domain/team.repository";
 import { IMemberRepository } from "../domain/member.repository";
 import { Team, TeamMember } from "../domain/team.entity";
 import { CreateTeamDto, UpdateTeamDto, AddTeamMembersDto } from "./team.dto";
-import { OrganizationRole } from "../domain/member.entity";
+import { DefaultRoleNames } from "../domain/member.entity";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
 import { ORG_ERROR_CODES } from "../interface/organization.response-codes";
@@ -17,9 +17,9 @@ export class TeamService {
     private memberRepo: IMemberRepository
   ) {}
 
-  private async getMemberRole(organizationId: string, userId: string): Promise<OrganizationRole | null> {
+  private async getMemberRoleName(organizationId: string, userId: string): Promise<string | null> {
     const member = await this.memberRepo.findMember(organizationId, userId);
-    return member ? member.role : null;
+    return member?.role?.name || null;
   }
 
   private async ensureTeamExists(teamId: string, organizationId: string): Promise<Team> {
@@ -39,10 +39,10 @@ export class TeamService {
     userId: string,
     data: CreateTeamDto
   ): Promise<Team> {
-    const role = await this.getMemberRole(organizationId, userId);
+    const role = await this.getMemberRoleName(organizationId, userId);
     
     // only owner, admin, team lead can create a team
-    if (!role || ![OrganizationRole.OWNER, OrganizationRole.ADMIN, OrganizationRole.TEAM_LEAD].includes(role)) {
+    if (!role || ![DefaultRoleNames.OWNER, DefaultRoleNames.ADMIN, DefaultRoleNames.TEAM_LEAD].includes(role as any)) {
       throw new AppError(
         "Insufficient permissions to create a team",
         403,
@@ -107,13 +107,13 @@ export class TeamService {
   ): Promise<void> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 
-    const role = await this.getMemberRole(organizationId, userId);
+    const role = await this.getMemberRoleName(organizationId, userId);
     const isLeader = team.leaderId === userId;
 
     // Only Owner, Admin, or the team leader can delete the team
     const canDelete =
-      role === OrganizationRole.OWNER ||
-      role === OrganizationRole.ADMIN ||
+      role === DefaultRoleNames.OWNER ||
+      role === DefaultRoleNames.ADMIN ||
       isLeader;
 
     if (!canDelete) {
@@ -135,14 +135,14 @@ export class TeamService {
   ): Promise<TeamMember> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 
-    const actorRole = await this.getMemberRole(organizationId, actorId);
+    const actorRole = await this.getMemberRoleName(organizationId, actorId);
     const isLeader = team.leaderId === actorId;
 
     // Owner/Admin can add to any team. Team Lead can only add to their own team.
     const canAdd = 
-        actorRole === OrganizationRole.OWNER || 
-        actorRole === OrganizationRole.ADMIN || 
-        (actorRole === OrganizationRole.TEAM_LEAD && isLeader);
+        actorRole === DefaultRoleNames.OWNER || 
+        actorRole === DefaultRoleNames.ADMIN || 
+        (actorRole === DefaultRoleNames.TEAM_LEAD && isLeader);
 
     if (!canAdd) {
       throw new AppError(
@@ -183,13 +183,13 @@ export class TeamService {
   ): Promise<{ added: TeamMember[]; skipped: string[] }> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 
-    const actorRole = await this.getMemberRole(organizationId, actorId);
+    const actorRole = await this.getMemberRoleName(organizationId, actorId);
     const isLeader = team.leaderId === actorId;
 
     const canAdd =
-      actorRole === OrganizationRole.OWNER ||
-      actorRole === OrganizationRole.ADMIN ||
-      (actorRole === OrganizationRole.TEAM_LEAD && isLeader);
+      actorRole === DefaultRoleNames.OWNER ||
+      actorRole === DefaultRoleNames.ADMIN ||
+      (actorRole === DefaultRoleNames.TEAM_LEAD && isLeader);
 
     if (!canAdd) {
       throw new AppError(
@@ -236,13 +236,13 @@ export class TeamService {
   ): Promise<void> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 
-    const actorRole = await this.getMemberRole(organizationId, actorId);
+    const actorRole = await this.getMemberRoleName(organizationId, actorId);
     const isLeader = team.leaderId === actorId;
 
     const canRemove = 
-        actorRole === OrganizationRole.OWNER || 
-        actorRole === OrganizationRole.ADMIN || 
-        (actorRole === OrganizationRole.TEAM_LEAD && isLeader);
+        actorRole === DefaultRoleNames.OWNER || 
+        actorRole === DefaultRoleNames.ADMIN || 
+        (actorRole === DefaultRoleNames.TEAM_LEAD && isLeader);
 
     if (!canRemove) {
       throw new AppError(
@@ -269,8 +269,8 @@ export class TeamService {
     
     const isTeamMember = await this.teamRepo.findMember(teamId, userId);
     const isLeader = team.leaderId === userId;
-    const role = await this.getMemberRole(organizationId, userId);
-    const isOwnerOrAdmin = role === OrganizationRole.OWNER || role === OrganizationRole.ADMIN;
+    const role = await this.getMemberRoleName(organizationId, userId);
+    const isOwnerOrAdmin = role === DefaultRoleNames.OWNER || role === DefaultRoleNames.ADMIN;
 
     if (!isTeamMember && !isLeader && !isOwnerOrAdmin) {
       throw new AppError(

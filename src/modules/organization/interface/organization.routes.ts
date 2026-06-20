@@ -20,6 +20,7 @@ export function createOrganizationRouter(
 
   router.get("/:id", (req, res) => orgController.getById(req, res));
   router.patch("/:id", (req, res) => orgController.update(req, res));
+  router.get("/:id/roles", (req, res) => orgController.getRoles(req, res));
 
   return router;
 }

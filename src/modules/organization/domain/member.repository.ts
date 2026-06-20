@@ -3,7 +3,6 @@
  */
 
 import {
-  OrganizationRole,
   OrganizationMember,
   OrganizationInvitation,
 } from "./member.entity";
@@ -12,7 +11,7 @@ export interface IMemberRepository {
   addMember(data: {
     organizationId: string;
     userId: string;
-    role: OrganizationRole;
+    roleId: string;
     status: any;
   }): Promise<OrganizationMember>;
   findMember(
@@ -32,7 +31,7 @@ export interface IMemberRepository {
     organizationId: string;
     inviterId: string;
     email: string;
-    role: OrganizationRole;
+    roleId: string;
     token: string;
     expiresAt: Date;
   }): Promise<OrganizationInvitation>;
@@ -43,4 +42,6 @@ export interface IMemberRepository {
   ): Promise<OrganizationInvitation>;
   listInvitations(organizationId: string): Promise<OrganizationInvitation[]>;
   deleteInvitation(id: string): Promise<void>;
+
+  createDefaultRoles(organizationId: string): Promise<Record<string, string>>;
 }

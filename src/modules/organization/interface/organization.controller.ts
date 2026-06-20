@@ -140,4 +140,31 @@ export class OrganizationController {
       return errorResponse(res, 500, "Internal server error", err);
     }
   }
+
+  async getRoles(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const userId = (req as any).userId;
+
+      const roles = await this.organizationService.getOrganizationRoles(id, userId);
+      return successResponse(
+        res,
+        roles,
+        200,
+        "Organization roles retrieved successfully",
+        SUCCESS_CODES.FETCHED,
+      );
+    } catch (err: any) {
+      if (err instanceof AppError) {
+        return errorResponse(
+          res,
+          err.statusCode,
+          err.message,
+          err.errors,
+          err.code,
+        );
+      }
+      return errorResponse(res, 500, "Internal server error", err);
+    }
+  }
 }

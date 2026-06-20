@@ -14,4 +14,5 @@ export interface IOrganizationRepository {
   findBySlug(slug: string): Promise<Organization | null>;
   findAllByUserId(userId: string): Promise<Organization[]>;
   update(id: string, data: Partial<Organization>): Promise<Organization>;
+  getRoles(organizationId: string): Promise<{ id: string; name: string; isDefault: boolean }[]>;
 }

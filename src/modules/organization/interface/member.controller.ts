@@ -16,7 +16,6 @@ import {
   updateMemberRoleSchema,
   updateMemberStatusSchema,
 } from "./member.validation";
-import { OrganizationRole } from "../domain/member.entity";
 import {
   SUCCESS_CODES,
   ERROR_CODES,

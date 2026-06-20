@@ -47,4 +47,12 @@ export class PrismaOrganizationRepository implements IOrganizationRepository {
       data,
     })) as unknown as Organization;
   }
+
+  async getRoles(organizationId: string): Promise<{ id: string; name: string; isDefault: boolean }[]> {
+    return await prisma.role.findMany({
+      where: { organizationId },
+      select: { id: true, name: true, isDefault: true },
+      orderBy: { createdAt: 'asc' }
+    });
+  }
 }

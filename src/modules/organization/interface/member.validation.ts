@@ -3,12 +3,12 @@
  */
 
 import { z } from "zod";
-import { OrganizationRole, OrganizationMemberStatus } from "../domain/member.entity";
+import { OrganizationMemberStatus } from "../domain/member.entity";
 
 export const inviteUserSchema = z
   .object({
     email: z.string().email(),
-    role: z.nativeEnum(OrganizationRole),
+    roleId: z.string().min(1, "Role is required"),
   })
   .strict();
 
@@ -20,7 +20,7 @@ export const acceptInvitationSchema = z
 
 export const updateMemberRoleSchema = z
   .object({
-    role: z.nativeEnum(OrganizationRole),
+    roleId: z.string().min(1, "Role is required"),
   })
   .strict();
 export const updateMemberStatusSchema = z

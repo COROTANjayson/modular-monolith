@@ -9,8 +9,8 @@ import { InviteUserDto, UpdateMemberRoleDto } from "./organization.dto";
 import {
   OrganizationMember,
   OrganizationInvitation,
-  OrganizationRole,
   OrganizationMemberStatus,
+  DefaultRoleNames,
 } from "../domain/member.entity";
 import { OrganizationPermission, hasPermission } from "../domain/permissions";
 import { AppError } from "../../../shared/utils/app-error";
@@ -30,7 +30,7 @@ export class MemberService {
     organizationId: string,
     userId: string,
     permission: OrganizationPermission,
-  ): Promise<OrganizationRole> {
+  ): Promise<string | undefined> {
     const member = await this.memberRepository.findMember(
       organizationId,
       userId,
@@ -43,7 +43,7 @@ export class MemberService {
       );
     }
 
-    if (!hasPermission(member.role, permission)) {
+    if (!hasPermission(member.role?.name, permission)) {
       throw new AppError(
         "You do not have permission to perform this action",
         403,
@@ -51,7 +51,7 @@ export class MemberService {
       );
     }
 
-    return member.role;
+    return member.role?.name;
   }
 
   async inviteUser(
@@ -75,7 +75,7 @@ export class MemberService {
       );
     }
 
-    if (data.role === OrganizationRole.OWNER) {
+    if (data.roleId === DefaultRoleNames.OWNER) {
       throw new AppError(
         "An organization can only have one owner",
         400,
@@ -108,7 +108,7 @@ export class MemberService {
       organizationId,
       inviterId,
       email: data.email,
-      role: data.role,
+      roleId: data.roleId,
       token,
       expiresAt,
     });
@@ -119,7 +119,7 @@ export class MemberService {
       organizationName: organization.name,
       inviterId,
       email: data.email,
-      role: data.role,
+      roleId: data.roleId,
       targetUserId: userToInvite?.id,
       token,
       inviteUrl: `${process.env.CLIENT_URL}/invites/accept?token=${token}`,
@@ -195,7 +195,7 @@ export class MemberService {
     await this.memberRepository.addMember({
       organizationId: invitation.organizationId,
       userId,
-      role: invitation.role,
+      roleId: invitation.roleId,
       status: OrganizationMemberStatus.ACTIVE,
     });
   }
@@ -322,10 +322,9 @@ export class MemberService {
       throw new AppError("Member not found", 404, ERROR_CODES.NOT_FOUND);
     }
 
-    // Protection logic for Owner remains as business rules
     if (
-      targetMember.role === OrganizationRole.OWNER &&
-      currentUserRole === OrganizationRole.ADMIN
+      targetMember.role?.name === DefaultRoleNames.OWNER &&
+      currentUserRole === DefaultRoleNames.ADMIN
     ) {
       throw new AppError(
         "Only organization owners can modify their own role",
@@ -335,13 +334,13 @@ export class MemberService {
     }
 
     if (
-      targetMember.role === OrganizationRole.OWNER &&
+      targetMember.role?.name === DefaultRoleNames.OWNER &&
       targetUserId !== currentUserId
     ) {
       throw new AppError("Cannot change role of organization owner", 400);
     }
 
-    if (data.role === OrganizationRole.OWNER) {
+    if (data.roleId === DefaultRoleNames.OWNER) {
       throw new AppError(
         "An organization can only have one owner",
         400,
@@ -353,7 +352,7 @@ export class MemberService {
       organizationId,
       targetUserId,
       {
-        role: data.role,
+        roleId: data.roleId,
       },
     );
   }
@@ -379,8 +378,8 @@ export class MemberService {
 
     // Protection logic for Owner
     if (
-      targetMember.role === OrganizationRole.OWNER &&
-      currentUserRole !== OrganizationRole.OWNER
+      targetMember.role?.name === DefaultRoleNames.OWNER &&
+      currentUserRole !== DefaultRoleNames.OWNER
     ) {
       throw new AppError(
         "Only owners can remove other owners (if multiple existed), and the primary owner cannot be removed.",
@@ -389,7 +388,7 @@ export class MemberService {
       );
     }
 
-    if (targetMember.role === OrganizationRole.OWNER) {
+    if (targetMember.role?.name === DefaultRoleNames.OWNER) {
       throw new AppError(
         "The organization owner cannot be removed",
         400,
@@ -445,7 +444,7 @@ export class MemberService {
     }
 
     // Protection for Owner
-    if (targetMember.role === OrganizationRole.OWNER) {
+    if (targetMember.role?.name === DefaultRoleNames.OWNER) {
       throw new AppError(
         "Cannot change status of organization owner",
         400,

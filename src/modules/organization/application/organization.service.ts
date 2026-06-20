@@ -12,8 +12,8 @@ import {
   Organization,
 } from "../domain/organization.entity";
 import {
-  OrganizationRole,
   OrganizationMemberStatus,
+  DefaultRoleNames,
 } from "../domain/member.entity";
 import { OrganizationPermission, hasPermission } from "../domain/permissions";
 import { AppError } from "../../../shared/utils/app-error";
@@ -30,7 +30,7 @@ export class OrganizationService {
     organizationId: string,
     userId: string,
     permission: OrganizationPermission,
-  ): Promise<OrganizationRole> {
+  ): Promise<string | undefined> {
     const member = await this.memberRepository.findMember(
       organizationId,
       userId,
@@ -43,7 +43,7 @@ export class OrganizationService {
       );
     }
 
-    if (!hasPermission(member.role, permission)) {
+    if (!hasPermission(member.role?.name, permission)) {
       throw new AppError(
         "You do not have permission to perform this action",
         403,
@@ -51,7 +51,7 @@ export class OrganizationService {
       );
     }
 
-    return member.role;
+    return member.role?.name;
   }
 
   async createOrganization(
@@ -65,11 +65,14 @@ export class OrganizationService {
       ownerId,
     });
 
+    // Create default roles
+    const roleIds = await this.memberRepository.createDefaultRoles(organization.id);
+
     // Add owner as active member
     await this.memberRepository.addMember({
       organizationId: organization.id,
       userId: ownerId,
-      role: OrganizationRole.OWNER,
+      roleId: roleIds[DefaultRoleNames.OWNER],
       status: OrganizationMemberStatus.ACTIVE,
     });
 
@@ -115,5 +118,10 @@ export class OrganizationService {
     }
 
     return this.organizationRepository.update(id, data);
+  }
+
+  async getOrganizationRoles(id: string, userId: string): Promise<{ id: string; name: string; isDefault: boolean }[]> {
+    await this.ensureHasPermission(id, userId, OrganizationPermission.ORG_READ);
+    return this.organizationRepository.getRoles(id);
   }
 }

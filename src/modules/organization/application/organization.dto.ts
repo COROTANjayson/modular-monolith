@@ -2,8 +2,6 @@
  * Application Layer - Organization DTOs
  */
 
-import { OrganizationRole } from "../domain/member.entity";
-
 
 export interface CreateOrganizationDto {
   name: string;
@@ -15,7 +13,7 @@ export interface UpdateOrganizationDto {
 
 export interface InviteUserDto {
   email: string;
-  role: OrganizationRole;
+  roleId: string;
 }
 
 export interface AcceptInvitationDto {
@@ -23,5 +21,5 @@ export interface AcceptInvitationDto {
 }
 
 export interface UpdateMemberRoleDto {
-  role: OrganizationRole;
+  roleId: string;
 }

@@ -1,7 +1,7 @@
 /**
  * Domain Layer - Organization Permissions
  */
-import { OrganizationRole } from "./member.entity";
+import { DefaultRoleNames } from "./member.entity";
 
 export enum OrganizationPermission {
   ORG_READ = "org:read",
@@ -21,8 +21,8 @@ export enum OrganizationPermission {
   TEAM_READ = "team:read",
 }
 
-const ROLE_PERMISSIONS: Record<OrganizationRole, OrganizationPermission[]> = {
-  [OrganizationRole.OWNER]: [
+const ROLE_PERMISSIONS: Record<string, OrganizationPermission[]> = {
+  [DefaultRoleNames.OWNER]: [
     OrganizationPermission.ORG_READ,
     OrganizationPermission.ORG_UPDATE,
     OrganizationPermission.ORG_DELETE,
@@ -37,7 +37,7 @@ const ROLE_PERMISSIONS: Record<OrganizationRole, OrganizationPermission[]> = {
     OrganizationPermission.TEAM_DELETE,
     OrganizationPermission.TEAM_READ,
   ],
-  [OrganizationRole.ADMIN]: [
+  [DefaultRoleNames.ADMIN]: [
     OrganizationPermission.ORG_READ,
     OrganizationPermission.ORG_UPDATE,
     OrganizationPermission.MEMBER_LIST,
@@ -51,14 +51,14 @@ const ROLE_PERMISSIONS: Record<OrganizationRole, OrganizationPermission[]> = {
     OrganizationPermission.TEAM_DELETE,
     OrganizationPermission.TEAM_READ,
   ],
-  [OrganizationRole.TEAM_LEAD]: [
+  [DefaultRoleNames.TEAM_LEAD]: [
     OrganizationPermission.ORG_READ,
     OrganizationPermission.MEMBER_LIST,
     OrganizationPermission.TEAM_CREATE,
     OrganizationPermission.TEAM_UPDATE,
     OrganizationPermission.TEAM_READ,
   ],
-  [OrganizationRole.MEMBER]: [
+  [DefaultRoleNames.MEMBER]: [
     OrganizationPermission.ORG_READ,
     OrganizationPermission.MEMBER_LIST,
     OrganizationPermission.TEAM_READ,
@@ -69,8 +69,9 @@ const ROLE_PERMISSIONS: Record<OrganizationRole, OrganizationPermission[]> = {
  * Checks if a given role has a specific permission
  */
 export function hasPermission(
-  role: OrganizationRole,
+  roleName: string | undefined,
   permission: OrganizationPermission,
 ): boolean {
-  return ROLE_PERMISSIONS[role]?.includes(permission) || false;
+  if (!roleName) return false;
+  return ROLE_PERMISSIONS[roleName]?.includes(permission) || false;
 }

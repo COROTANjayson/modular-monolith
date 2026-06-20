@@ -40,7 +40,7 @@ export interface AppEvents {
       organizationName: string;
       inviterId: string;
       email: string;
-      role: string;
+      roleId: string;
       targetUserId?: string;
       token: string;
       inviteUrl: string;
