@@ -21,7 +21,7 @@ export enum OrganizationPermission {
   TEAM_READ = "team:read",
 }
 
-const ROLE_PERMISSIONS: Record<string, OrganizationPermission[]> = {
+export const ROLE_PERMISSIONS: Record<string, OrganizationPermission[]> = {
   [DefaultRoleNames.OWNER]: [
     OrganizationPermission.ORG_READ,
     OrganizationPermission.ORG_UPDATE,

@@ -43,7 +43,7 @@ export class OrganizationService {
       );
     }
 
-    if (!hasPermission(member.role?.name, permission)) {
+    if (!member.role?.permissions?.includes(permission)) {
       throw new AppError(
         "You do not have permission to perform this action",
         403,

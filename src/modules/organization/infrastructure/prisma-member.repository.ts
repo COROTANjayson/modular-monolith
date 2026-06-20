@@ -8,6 +8,7 @@ import {
   OrganizationMember,
   OrganizationInvitation,
 } from "../domain/member.entity";
+import { ROLE_PERMISSIONS } from "../domain/permissions";
 
 export class PrismaMemberRepository implements IMemberRepository {
   async addMember(data: {
@@ -160,7 +161,7 @@ export class PrismaMemberRepository implements IMemberRepository {
         data: {
           organizationId,
           name: roleName,
-          permissions: [],
+          permissions: ROLE_PERMISSIONS[roleName] || [],
           isDefault: true,
         }
       });
