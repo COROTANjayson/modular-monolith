@@ -21,6 +21,9 @@ export function createOrganizationRouter(
   router.get("/:id", (req, res) => orgController.getById(req, res));
   router.patch("/:id", (req, res) => orgController.update(req, res));
   router.get("/:id/roles", (req, res) => orgController.getRoles(req, res));
+  router.post("/:id/roles", (req, res) => orgController.createRole(req, res));
+  router.put("/:id/roles/:roleId", (req, res) => orgController.updateRole(req, res));
+  router.delete("/:id/roles/:roleId", (req, res) => orgController.deleteRole(req, res));
 
   return router;
 }

@@ -1,167 +1,167 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-    id                       String    @id @default(uuid())
-    firstName                String?
-    lastName                 String?
-    email                    String    @unique
-    password                 String?
-    googleId                 String?   @unique
-    avatar                   String?
-    age                      Int?
-    gender                   String?
-    createdAt                DateTime  @default(now())
-    updatedAt                DateTime  @updatedAt
-    // For refresh token rotation using JTI approach:
-    currentTokenId           String?
-    isVerified               Boolean   @default(false)
-    verificationToken        String?   @unique
-    verificationTokenExpires DateTime?
+  id                       String    @id @default(uuid())
+  firstName                String?
+  lastName                 String?
+  email                    String    @unique
+  password                 String?
+  googleId                 String?   @unique
+  avatar                   String?
+  age                      Int?
+  gender                   String?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  // For refresh token rotation using JTI approach:
+  currentTokenId           String?
+  isVerified               Boolean   @default(false)
+  verificationToken        String?   @unique
+  verificationTokenExpires DateTime?
 
-    organizationMembers OrganizationMember[]
-    notifications       Notification[]
-    teamMembers         TeamMember[]
-    teamsLed            Team[] @relation("TeamLeader")
-    chatMessages        ChatMessage[] @relation("ChatMessages")
+  organizationMembers OrganizationMember[]
+  notifications       Notification[]
+  teamMembers         TeamMember[]
+  teamsLed            Team[]               @relation("TeamLeader")
+  chatMessages        ChatMessage[]        @relation("ChatMessages")
 }
 
 model Organization {
-    id      String @id @default(cuid())
-    name    String
-    slug    String @unique
-    ownerId String
+  id      String @id @default(cuid())
+  name    String
+  slug    String @unique
+  ownerId String
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    members     OrganizationMember[]
-    invitations OrganizationInvitation[]
-    teams       Team[]
-    roles       Role[]
+  members     OrganizationMember[]
+  invitations OrganizationInvitation[]
+  teams       Team[]
+  roles       Role[]
 }
 
 model OrganizationMember {
-    id             String                   @id @default(cuid())
-    organizationId String
-    userId         String
-    roleId         String
-    status         OrganizationMemberStatus
+  id             String                   @id @default(cuid())
+  organizationId String
+  userId         String
+  roleId         String?
+  status         OrganizationMemberStatus
 
-    invitedAt DateTime  @default(now())
-    joinedAt  DateTime?
+  invitedAt DateTime  @default(now())
+  joinedAt  DateTime?
 
-    organization Organization @relation(fields: [organizationId], references: [id])
-    user         User         @relation(fields: [userId], references: [id])
-    role         Role         @relation(fields: [roleId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+  role         Role?        @relation(fields: [roleId], references: [id], onDelete: SetNull)
 
-    @@unique([organizationId, userId])
+  @@unique([organizationId, userId])
 }
 
 model OrganizationInvitation {
-    id             String           @id @default(cuid())
-    organizationId String
-    inviterId      String
-    email          String
-    roleId         String
-    token          String           @unique
+  id             String  @id @default(cuid())
+  organizationId String
+  inviterId      String
+  email          String
+  roleId         String?
+  token          String  @unique
 
-    expiresAt  DateTime
-    acceptedAt DateTime?
+  expiresAt  DateTime
+  acceptedAt DateTime?
 
-    createdAt DateTime @default(now())
+  createdAt DateTime @default(now())
 
-    organization Organization @relation(fields: [organizationId], references: [id])
-    role         Role         @relation(fields: [roleId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+  role         Role?        @relation(fields: [roleId], references: [id], onDelete: SetNull)
 }
 
 model Team {
-    id             String   @id @default(cuid())
-    organizationId String
-    name           String
-    description    String?
-    leaderId       String
-    createdAt      DateTime @default(now())
-    updatedAt      DateTime @updatedAt
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  leaderId       String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-    organization Organization @relation(fields: [organizationId], references: [id])
-    leader       User         @relation("TeamLeader", fields: [leaderId], references: [id]) // Virtual relation for leader
-    members      TeamMember[]
-    chatMessages ChatMessage[]
+  organization Organization  @relation(fields: [organizationId], references: [id])
+  leader       User          @relation("TeamLeader", fields: [leaderId], references: [id]) // Virtual relation for leader
+  members      TeamMember[]
+  chatMessages ChatMessage[]
 
-    @@unique([organizationId, name])
+  @@unique([organizationId, name])
 }
 
 model TeamMember {
-    id        String   @id @default(cuid())
-    teamId    String
-    userId    String
-    joinedAt  DateTime @default(now())
+  id       String   @id @default(cuid())
+  teamId   String
+  userId   String
+  joinedAt DateTime @default(now())
 
-    team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([teamId, userId])
+  @@unique([teamId, userId])
 }
 
 model Role {
-    id             String   @id @default(cuid())
-    organizationId String
-    name           String
-    permissions    String[]
-    isDefault      Boolean  @default(false)
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  permissions    String[]
+  isDefault      Boolean  @default(false)
 
-    members        OrganizationMember[]
-    invitations    OrganizationInvitation[]
+  members     OrganizationMember[]
+  invitations OrganizationInvitation[]
 
-    createdAt      DateTime @default(now())
-    updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-    @@unique([organizationId, name])
+  @@unique([organizationId, name])
 }
 
 enum OrganizationMemberStatus {
-    invited
-    active
-    suspended
-    left
+  invited
+  active
+  suspended
+  left
 }
 
 model Notification {
-    id        String    @id @default(cuid())
-    userId    String
-    type      String
-    title     String
-    message   String
-    metadata    Json?
-    redirectUrl String?
-    isRead    Boolean   @default(false)
-    readAt    DateTime?
-    createdAt DateTime  @default(now())
+  id          String    @id @default(cuid())
+  userId      String
+  type        String
+  title       String
+  message     String
+  metadata    Json?
+  redirectUrl String?
+  isRead      Boolean   @default(false)
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
 
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@index([userId, isRead, createdAt])
+  @@index([userId, isRead, createdAt])
 }
 
 model ChatMessage {
-    id        String   @id @default(cuid())
-    teamId    String
-    senderId  String
-    content   String
-    createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  teamId    String
+  senderId  String
+  content   String
+  createdAt DateTime @default(now())
 
-    team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-    sender User @relation("ChatMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  team   Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  sender User @relation("ChatMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
-    @@index([teamId, createdAt])
+  @@index([teamId, createdAt])
 }

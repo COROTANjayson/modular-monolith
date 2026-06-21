@@ -13,6 +13,8 @@ import { AppError } from "../../../shared/utils/app-error";
 import {
   createOrganizationSchema,
   updateOrganizationSchema,
+  createRoleSchema,
+  updateRoleSchema,
 } from "./organization.validation";
 import {
   SUCCESS_CODES,
@@ -163,6 +165,81 @@ export class OrganizationController {
           err.errors,
           err.code,
         );
+      }
+      return errorResponse(res, 500, "Internal server error", err);
+    }
+  }
+
+  async createRole(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const userId = (req as any).userId;
+      const validatedData = validate(createRoleSchema, req.body);
+
+      const role = await this.organizationService.createRole(
+        id,
+        userId,
+        validatedData.name,
+        validatedData.permissions || []
+      );
+      return successResponse(
+        res,
+        role,
+        201,
+        "Role created successfully",
+        SUCCESS_CODES.CREATED,
+      );
+    } catch (err: any) {
+      if (err instanceof AppError) {
+        return errorResponse(res, err.statusCode, err.message, err.errors, err.code);
+      }
+      return errorResponse(res, 500, "Internal server error", err);
+    }
+  }
+
+  async updateRole(req: Request, res: Response) {
+    try {
+      const { id, roleId } = req.params;
+      const userId = (req as any).userId;
+      const validatedData = validate(updateRoleSchema, req.body);
+
+      const role = await this.organizationService.updateRole(
+        roleId,
+        id,
+        userId,
+        validatedData
+      );
+      return successResponse(
+        res,
+        role,
+        200,
+        "Role updated successfully",
+        SUCCESS_CODES.UPDATED,
+      );
+    } catch (err: any) {
+      if (err instanceof AppError) {
+        return errorResponse(res, err.statusCode, err.message, err.errors, err.code);
+      }
+      return errorResponse(res, 500, "Internal server error", err);
+    }
+  }
+
+  async deleteRole(req: Request, res: Response) {
+    try {
+      const { id, roleId } = req.params;
+      const userId = (req as any).userId;
+
+      await this.organizationService.deleteRole(roleId, id, userId);
+      return successResponse(
+        res,
+        null,
+        200,
+        "Role deleted successfully",
+        SUCCESS_CODES.DELETED,
+      );
+    } catch (err: any) {
+      if (err instanceof AppError) {
+        return errorResponse(res, err.statusCode, err.message, err.errors, err.code);
       }
       return errorResponse(res, 500, "Internal server error", err);
     }

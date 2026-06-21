@@ -19,23 +19,16 @@ export enum OrganizationPermission {
   TEAM_UPDATE = "team:update",
   TEAM_DELETE = "team:delete",
   TEAM_READ = "team:read",
+
+  ROLE_CREATE = "role:create",
+  ROLE_UPDATE = "role:update",
+  ROLE_DELETE = "role:delete",
+  ROLE_READ = "role:read",
 }
 
 export const ROLE_PERMISSIONS: Record<string, OrganizationPermission[]> = {
   [DefaultRoleNames.OWNER]: [
-    OrganizationPermission.ORG_READ,
-    OrganizationPermission.ORG_UPDATE,
-    OrganizationPermission.ORG_DELETE,
-    OrganizationPermission.MEMBER_LIST,
-    OrganizationPermission.MEMBER_INVITE,
-    OrganizationPermission.MEMBER_INVITE_REVOKE,
-    OrganizationPermission.MEMBER_UPDATE_ROLE,
-    OrganizationPermission.MEMBER_UPDATE_STATUS,
-    OrganizationPermission.MEMBER_REMOVE,
-    OrganizationPermission.TEAM_CREATE,
-    OrganizationPermission.TEAM_UPDATE,
-    OrganizationPermission.TEAM_DELETE,
-    OrganizationPermission.TEAM_READ,
+    // Owner is treated as super-user and bypasses checks in hasPermission
   ],
   [DefaultRoleNames.ADMIN]: [
     OrganizationPermission.ORG_READ,
@@ -50,6 +43,10 @@ export const ROLE_PERMISSIONS: Record<string, OrganizationPermission[]> = {
     OrganizationPermission.TEAM_UPDATE,
     OrganizationPermission.TEAM_DELETE,
     OrganizationPermission.TEAM_READ,
+    OrganizationPermission.ROLE_CREATE,
+    OrganizationPermission.ROLE_UPDATE,
+    OrganizationPermission.ROLE_DELETE,
+    OrganizationPermission.ROLE_READ,
   ],
   [DefaultRoleNames.TEAM_LEAD]: [
     OrganizationPermission.ORG_READ,
@@ -73,5 +70,6 @@ export function hasPermission(
   permission: OrganizationPermission,
 ): boolean {
   if (!roleName) return false;
+  if (roleName === DefaultRoleNames.OWNER) return true;
   return ROLE_PERMISSIONS[roleName]?.includes(permission) || false;
 }

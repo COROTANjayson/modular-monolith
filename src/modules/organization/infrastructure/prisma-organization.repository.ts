@@ -48,11 +48,44 @@ export class PrismaOrganizationRepository implements IOrganizationRepository {
     })) as unknown as Organization;
   }
 
-  async getRoles(organizationId: string): Promise<{ id: string; name: string; isDefault: boolean }[]> {
+  async getRoles(organizationId: string): Promise<{ id: string; name: string; isDefault: boolean; permissions: string[] }[]> {
     return await prisma.role.findMany({
       where: { organizationId },
-      select: { id: true, name: true, isDefault: true },
+      select: { id: true, name: true, isDefault: true, permissions: true },
       orderBy: { createdAt: 'asc' }
+    });
+  }
+
+  async findRole(id: string, organizationId: string): Promise<{ id: string; name: string; isDefault: boolean; permissions: string[] } | null> {
+    return await prisma.role.findFirst({
+      where: { id, organizationId },
+      select: { id: true, name: true, isDefault: true, permissions: true }
+    });
+  }
+
+  async createRole(organizationId: string, name: string, permissions: string[]): Promise<{ id: string; name: string; isDefault: boolean; permissions: string[] }> {
+    return await prisma.role.create({
+      data: {
+        organizationId,
+        name,
+        permissions,
+        isDefault: false
+      },
+      select: { id: true, name: true, isDefault: true, permissions: true }
+    });
+  }
+
+  async updateRole(id: string, organizationId: string, data: { name?: string; permissions?: string[] }): Promise<{ id: string; name: string; isDefault: boolean; permissions: string[] }> {
+    return await prisma.role.update({
+      where: { id },
+      data,
+      select: { id: true, name: true, isDefault: true, permissions: true }
+    });
+  }
+
+  async deleteRole(id: string, organizationId: string): Promise<void> {
+    await prisma.role.deleteMany({
+      where: { id, organizationId }
     });
   }
 }
