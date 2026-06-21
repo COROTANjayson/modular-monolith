@@ -43,8 +43,8 @@ const morganMiddleware = morgan(
 
 app.use(morganMiddleware);
 
-// Default: 100 requests per 15 minutes
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
+// Default: 1000 requests per 15 minutes
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 });
 app.use(limiter);
 
 // Swagger API Documentation

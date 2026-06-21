@@ -8,9 +8,7 @@ import {
   CreateOrganizationDto,
   UpdateOrganizationDto,
 } from "./organization.dto";
-import {
-  Organization,
-} from "../domain/organization.entity";
+import { Organization } from "../domain/organization.entity";
 import {
   OrganizationMemberStatus,
   DefaultRoleNames,
@@ -43,7 +41,10 @@ export class OrganizationService {
       );
     }
 
-    if (member.role?.name !== DefaultRoleNames.OWNER && !member.role?.permissions?.includes(permission)) {
+    if (
+      member.role?.name !== DefaultRoleNames.OWNER &&
+      !member.role?.permissions?.includes(permission)
+    ) {
       throw new AppError(
         "You do not have permission to perform this action",
         403,
@@ -66,7 +67,9 @@ export class OrganizationService {
     });
 
     // Create default roles
-    const roleIds = await this.memberRepository.createDefaultRoles(organization.id);
+    const roleIds = await this.memberRepository.createDefaultRoles(
+      organization.id,
+    );
 
     // Add owner as active member
     await this.memberRepository.addMember({
@@ -120,18 +123,59 @@ export class OrganizationService {
     return this.organizationRepository.update(id, data);
   }
 
-  async getOrganizationRoles(id: string, userId: string): Promise<{ id: string; name: string; isDefault: boolean; permissions: string[] }[]> {
-    await this.ensureHasPermission(id, userId, OrganizationPermission.ROLE_READ);
+  async getOrganizationRoles(
+    id: string,
+    userId: string,
+  ): Promise<
+    { id: string; name: string; isDefault: boolean; permissions: string[] }[]
+  > {
+    await this.ensureHasPermission(
+      id,
+      userId,
+      OrganizationPermission.ROLE_READ,
+    );
     return this.organizationRepository.getRoles(id);
   }
 
-  async createRole(organizationId: string, userId: string, name: string, permissions: string[]): Promise<{ id: string; name: string; isDefault: boolean; permissions: string[] }> {
-    await this.ensureHasPermission(organizationId, userId, OrganizationPermission.ROLE_CREATE);
-    return this.organizationRepository.createRole(organizationId, name, permissions);
+  async createRole(
+    organizationId: string,
+    userId: string,
+    name: string,
+    permissions: string[],
+  ): Promise<{
+    id: string;
+    name: string;
+    isDefault: boolean;
+    permissions: string[];
+  }> {
+    await this.ensureHasPermission(
+      organizationId,
+      userId,
+      OrganizationPermission.ROLE_CREATE,
+    );
+    return this.organizationRepository.createRole(
+      organizationId,
+      name,
+      permissions,
+    );
   }
 
-  async updateRole(id: string, organizationId: string, userId: string, data: { name?: string; permissions?: string[] }): Promise<{ id: string; name: string; isDefault: boolean; permissions: string[] }> {
-    await this.ensureHasPermission(organizationId, userId, OrganizationPermission.ROLE_UPDATE);
+  async updateRole(
+    id: string,
+    organizationId: string,
+    userId: string,
+    data: { name?: string; permissions?: string[] },
+  ): Promise<{
+    id: string;
+    name: string;
+    isDefault: boolean;
+    permissions: string[];
+  }> {
+    await this.ensureHasPermission(
+      organizationId,
+      userId,
+      OrganizationPermission.ROLE_UPDATE,
+    );
 
     const role = await this.organizationRepository.findRole(id, organizationId);
     if (!role) {
@@ -139,14 +183,26 @@ export class OrganizationService {
     }
 
     if (role.name === DefaultRoleNames.OWNER) {
-      throw new AppError("Cannot update the owner role", 400, ERROR_CODES.BAD_REQUEST);
+      throw new AppError(
+        "Cannot update the owner role",
+        400,
+        ERROR_CODES.BAD_REQUEST,
+      );
     }
 
     return this.organizationRepository.updateRole(id, organizationId, data);
   }
 
-  async deleteRole(id: string, organizationId: string, userId: string): Promise<void> {
-    await this.ensureHasPermission(organizationId, userId, OrganizationPermission.ROLE_DELETE);
+  async deleteRole(
+    id: string,
+    organizationId: string,
+    userId: string,
+  ): Promise<void> {
+    await this.ensureHasPermission(
+      organizationId,
+      userId,
+      OrganizationPermission.ROLE_DELETE,
+    );
 
     const role = await this.organizationRepository.findRole(id, organizationId);
     if (!role) {
@@ -154,7 +210,11 @@ export class OrganizationService {
     }
 
     if (role.isDefault) {
-      throw new AppError("Cannot delete default roles", 400, ERROR_CODES.BAD_REQUEST);
+      throw new AppError(
+        "Cannot delete default roles",
+        400,
+        ERROR_CODES.BAD_REQUEST,
+      );
     }
 
     await this.organizationRepository.deleteRole(id, organizationId);
