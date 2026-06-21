@@ -7,6 +7,7 @@ import { IMemberRepository } from "../domain/member.repository";
 import { Team, TeamMember } from "../domain/team.entity";
 import { CreateTeamDto, UpdateTeamDto, AddTeamMembersDto } from "./team.dto";
 import { DefaultRoleNames } from "../domain/member.entity";
+import { OrganizationPermission, hasPermission } from "../domain/permissions";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
 import { ORG_ERROR_CODES } from "../interface/organization.response-codes";
@@ -41,8 +42,7 @@ export class TeamService {
   ): Promise<Team> {
     const role = await this.getMemberRoleName(organizationId, userId);
     
-    // only owner, admin, team lead can create a team
-    if (!role || ![DefaultRoleNames.OWNER, DefaultRoleNames.ADMIN, DefaultRoleNames.TEAM_LEAD].includes(role as any)) {
+    if (!role || !hasPermission(role, OrganizationPermission.TEAM_CREATE)) {
       throw new AppError(
         "Insufficient permissions to create a team",
         403,
@@ -110,11 +110,7 @@ export class TeamService {
     const role = await this.getMemberRoleName(organizationId, userId);
     const isLeader = team.leaderId === userId;
 
-    // Only Owner, Admin, or the team leader can delete the team
-    const canDelete =
-      role === DefaultRoleNames.OWNER ||
-      role === DefaultRoleNames.ADMIN ||
-      isLeader;
+    const canDelete = isLeader || hasPermission(role ?? undefined, OrganizationPermission.TEAM_DELETE);
 
     if (!canDelete) {
       throw new AppError(
@@ -135,18 +131,11 @@ export class TeamService {
   ): Promise<TeamMember> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 
-    const actorRole = await this.getMemberRoleName(organizationId, actorId);
     const isLeader = team.leaderId === actorId;
 
-    // Owner/Admin can add to any team. Team Lead can only add to their own team.
-    const canAdd = 
-        actorRole === DefaultRoleNames.OWNER || 
-        actorRole === DefaultRoleNames.ADMIN || 
-        (actorRole === DefaultRoleNames.TEAM_LEAD && isLeader);
-
-    if (!canAdd) {
+    if (!isLeader) {
       throw new AppError(
-        "Insufficient permissions to add members to this team",
+        "Only the team creator can add members",
         403,
         ERROR_CODES.FORBIDDEN,
       );
@@ -183,17 +172,11 @@ export class TeamService {
   ): Promise<{ added: TeamMember[]; skipped: string[] }> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 
-    const actorRole = await this.getMemberRoleName(organizationId, actorId);
     const isLeader = team.leaderId === actorId;
 
-    const canAdd =
-      actorRole === DefaultRoleNames.OWNER ||
-      actorRole === DefaultRoleNames.ADMIN ||
-      (actorRole === DefaultRoleNames.TEAM_LEAD && isLeader);
-
-    if (!canAdd) {
+    if (!isLeader) {
       throw new AppError(
-        "Insufficient permissions to add members to this team",
+        "Only the team creator can add members",
         403,
         ERROR_CODES.FORBIDDEN,
       );
@@ -236,17 +219,11 @@ export class TeamService {
   ): Promise<void> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 
-    const actorRole = await this.getMemberRoleName(organizationId, actorId);
     const isLeader = team.leaderId === actorId;
 
-    const canRemove = 
-        actorRole === DefaultRoleNames.OWNER || 
-        actorRole === DefaultRoleNames.ADMIN || 
-        (actorRole === DefaultRoleNames.TEAM_LEAD && isLeader);
-
-    if (!canRemove) {
+    if (!isLeader) {
       throw new AppError(
-        "Insufficient permissions to remove members from this team",
+        "Only the team creator can remove members",
         403,
         ERROR_CODES.FORBIDDEN,
       );

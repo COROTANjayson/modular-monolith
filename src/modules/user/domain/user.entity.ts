@@ -11,6 +11,7 @@ export interface User {
   age: number | null;
   gender: string | null;
   avatar: string | null;
+  isVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,4 +21,5 @@ export interface UserUpdateData {
   lastName?: string;
   age?: number;
   gender?: string;
+  avatar?: string;
 }
