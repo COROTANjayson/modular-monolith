@@ -34,8 +34,9 @@ export class RefreshTokenUseCase {
     }
 
     // Check token validity using domain rules by checking if session exists
-    const session = await this.userRepo.findSessionByJti(tokenData.jti);
-    if (!AuthRules.isRefreshTokenValid(!!session)) {
+    const session = await this.userRepo.findSessionByJtiOrPreviousJti(tokenData.jti);
+    
+    if (!session) {
       // Possible token reuse attack - revoke all sessions!
       await this.userRepo.revokeAllUserSessions(user.id);
       throw new AppError(
@@ -45,10 +46,27 @@ export class RefreshTokenUseCase {
       );
     }
 
+    // Check Grace Period if it was the previous JTI
+    if (session.isPreviousJti) {
+      if (!session.previousJtiExpiresAt || session.previousJtiExpiresAt < new Date()) {
+        // Grace period expired! Revoke sessions!
+        await this.userRepo.revokeAllUserSessions(user.id);
+        throw new AppError(
+          "Refresh token grace period expired",
+          401,
+          AUTH_ERROR_CODES.AUTH_TOKEN_EXPIRED,
+        );
+      }
+      // If grace period is valid, we allow the rotation to proceed using the currentJti
+    }
+
     // Generate new session (rotate JTI)
     const newJti = this.tokenGenerator.generateUUID();
     const newExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
-    await this.userRepo.updateSessionJti(tokenData.jti, newJti, newExpiresAt);
+    const gracePeriodEndsAt = new Date(Date.now() + 1000 * 15); // 15 seconds grace period
+    
+    // We always update the *currentJti* in the DB, even if this request came in using the previousJti
+    await this.userRepo.updateSessionJti(session.currentJti, newJti, newExpiresAt, gracePeriodEndsAt);
 
     const accessToken = this.tokenGenerator.generateAccessToken({
       id: user.id,

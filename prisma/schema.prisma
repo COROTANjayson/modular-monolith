@@ -169,8 +169,10 @@ model ChatMessage {
 model UserSession {
   id           String   @id @default(uuid())
   userId       String
-  jti          String   @unique // Tracks the current valid JTI for this session family
-  deviceInfo   String?  // Optional metadata (User-Agent, IP, Device Name)
+  jti                  String    @unique // Tracks the current valid JTI for this session family
+  previousJti          String?   @unique // Tracks the previous JTI for RTR grace period
+  previousJtiExpiresAt DateTime? // When the previous JTI expires (grace period end)
+  deviceInfo           String?  // Optional metadata (User-Agent, IP, Device Name)
   ipAddress    String?
   expiresAt    DateTime
   createdAt    DateTime @default(now())

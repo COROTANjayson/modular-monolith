@@ -59,10 +59,36 @@ export class PrismaAuthUserRepository implements IAuthUserRepository {
     return session;
   }
 
-  async updateSessionJti(oldJti: string, newJti: string, expiresAt: Date): Promise<void> {
+  async findSessionByJtiOrPreviousJti(jti: string): Promise<{ userId: string; isPreviousJti: boolean; previousJtiExpiresAt?: Date | null; currentJti: string } | null> {
+    const session = await prisma.userSession.findFirst({
+      where: {
+        OR: [
+          { jti },
+          { previousJti: jti }
+        ]
+      },
+      select: { userId: true, jti: true, previousJti: true, previousJtiExpiresAt: true }
+    });
+
+    if (!session) return null;
+
+    return {
+      userId: session.userId,
+      isPreviousJti: session.previousJti === jti,
+      previousJtiExpiresAt: session.previousJtiExpiresAt,
+      currentJti: session.jti,
+    };
+  }
+
+  async updateSessionJti(oldJti: string, newJti: string, expiresAt: Date, gracePeriodEndsAt?: Date): Promise<void> {
     await prisma.userSession.update({
       where: { jti: oldJti },
-      data: { jti: newJti, expiresAt },
+      data: { 
+        jti: newJti, 
+        expiresAt,
+        previousJti: oldJti,
+        previousJtiExpiresAt: gracePeriodEndsAt
+      },
     });
   }
 
