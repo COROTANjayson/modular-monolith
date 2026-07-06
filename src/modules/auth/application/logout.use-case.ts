@@ -14,9 +14,7 @@ export class LogoutUseCase {
       if (!user) return;
 
       // Invalidate current session
-      if (user.currentTokenId === tokenData.jti) {
-        await this.userRepo.update(user.id, { currentTokenId: null });
-      }
+      await this.userRepo.deleteSessionByJti(tokenData.jti);
     } catch {
       // Silently fail for invalid tokens
     }

@@ -70,7 +70,9 @@ export class UpdatePasswordUseCase {
     // Update user
     await this.userRepo.update(user.id, {
       password: hashedPassword,
-      currentTokenId: null, // Invalidate current sessions for security
     });
+    
+    // Invalidate current sessions for security
+    await this.userRepo.revokeAllUserSessions(user.id);
   }
 }

@@ -20,6 +20,11 @@ export interface IAuthUserRepository {
   findByEmail(email: string): Promise<AuthUser | null>;
   findByVerificationToken(token: string): Promise<AuthUser | null>;
   findByGoogleId(googleId: string): Promise<AuthUser | null>;
+  createSession(userId: string, jti: string, expiresAt: Date, deviceInfo?: string, ipAddress?: string): Promise<void>;
+  findSessionByJti(jti: string): Promise<{ userId: string } | null>;
+  updateSessionJti(oldJti: string, newJti: string, expiresAt: Date): Promise<void>;
+  revokeAllUserSessions(userId: string): Promise<void>;
+  deleteSessionByJti(jti: string): Promise<void>;
 }
 
 /**

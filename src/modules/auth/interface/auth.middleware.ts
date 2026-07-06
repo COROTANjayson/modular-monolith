@@ -12,12 +12,15 @@ export function authMiddleware(
   res: Response,
   next: NextFunction,
 ) {
-  const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Missing token" });
+  const authHeader = req.headers.authorization;
+  
+  let token = req.cookies?.accessToken;
+  if (!token && authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.slice(7);
   }
 
-  const token = auth.slice(7);
+  if (!token) return res.status(401).json({ error: "Missing token" });
+
   try {
     const payload: any = jwt.verify(token, ACCESS_SECRET);
     (req as any).userId = payload.id;

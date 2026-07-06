@@ -71,9 +71,10 @@ export class FindOrCreateGoogleUserUseCase {
     
     // 4. Generate Tokens
     const jti = this.tokenGenerator.generateUUID();
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
 
-    // Update user with currentTokenId (for refresh token rotation)
-    await this.userRepo.update(user.id, { currentTokenId: jti });
+    // Create session for refresh token rotation
+    await this.userRepo.createSession(user.id, jti, expiresAt);
 
     const accessToken = this.tokenGenerator.generateAccessToken({ id: user.id, email: user.email });
     const refreshToken = this.tokenGenerator.generateRefreshToken({ 

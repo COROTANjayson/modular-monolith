@@ -16,7 +16,7 @@ export const PORT = process.env.PORT;
 export const REFRESH_COOKIE_NAME =
   process.env.REFRESH_COOKIE_NAME || "refresh_cookie";
 export const CSRF_COOKIE_NAME = process.env.CSRF_COOKIE_NAME || "csrf_token";
-export const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN;
+export const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN === "localhost" ? undefined : process.env.COOKIE_DOMAIN;
 export const COOKIE_SECURE = process.env.COOKIE_SECURE === "true" || false;
 export const COOKIE_SAME_SITE =
   (process.env.COOKIE_SAME_SITE as "none" | "lax" | "strict") || "lax";

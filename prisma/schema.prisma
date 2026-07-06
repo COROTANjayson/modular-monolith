@@ -20,8 +20,8 @@ model User {
   gender                   String?
   createdAt                DateTime  @default(now())
   updatedAt                DateTime  @updatedAt
-  // For refresh token rotation using JTI approach:
-  currentTokenId           String?
+  // Replaced currentTokenId with 1-to-many relation:
+  sessions                 UserSession[]
   isVerified               Boolean   @default(false)
   verificationToken        String?   @unique
   verificationTokenExpires DateTime?
@@ -164,4 +164,19 @@ model ChatMessage {
   sender User @relation("ChatMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([teamId, createdAt])
+}
+
+model UserSession {
+  id           String   @id @default(uuid())
+  userId       String
+  jti          String   @unique // Tracks the current valid JTI for this session family
+  deviceInfo   String?  // Optional metadata (User-Agent, IP, Device Name)
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
 }

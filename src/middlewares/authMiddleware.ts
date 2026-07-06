@@ -7,10 +7,21 @@ export function authMiddleware(
   res: Response,
   next: NextFunction,
 ) {
-  const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith("Bearer "))
-    return res.status(401).json({ error: "Missing token" });
-  const token = auth.slice(7);
+  const authHeader = req.headers.authorization;
+  
+  let token = req.cookies?.accessToken;
+  if (!token && authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.slice(7);
+  }
+
+  console.log("AuthMiddleware Debug:", { 
+    cookies: req.cookies, 
+    authHeader, 
+    tokenFound: !!token 
+  });
+
+  if (!token) return res.status(401).json({ error: "Missing token" });
+
   try {
     const payload: any = jwt.verify(token, ACCESS_SECRET);
     (req as any).userId = payload.id;

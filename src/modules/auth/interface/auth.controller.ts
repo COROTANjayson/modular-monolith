@@ -103,6 +103,13 @@ export class AuthController {
 
       logger.debug("CSRF token generated for login");
 
+      res.cookie("accessToken", tokens.accessToken, {
+        httpOnly: true,
+        secure: COOKIE_SECURE,
+        domain: COOKIE_DOMAIN,
+        sameSite: COOKIE_SAME_SITE,
+        maxAge: 1000 * 60 * 15, // 15 mins
+      });
       res.cookie(REFRESH_COOKIE_NAME, tokens.refreshToken, {
         httpOnly: true,
         secure: COOKIE_SECURE,
@@ -122,7 +129,7 @@ export class AuthController {
 
       return successResponse(
         res,
-        { ...tokens, csrfToken },
+        { csrfToken }, // removed tokens from body
         200,
         "Login Success",
         AUTH_SUCCESS_CODES.AUTH_LOGIN_SUCCESS,
@@ -174,6 +181,13 @@ export class AuthController {
       // Rotate CSRF token for new session
       const newCsrf = generateCsrfToken();
       logger.debug("CSRF token rotated for token refresh");
+      res.cookie("accessToken", tokens.accessToken, {
+        httpOnly: true,
+        secure: COOKIE_SECURE,
+        domain: COOKIE_DOMAIN,
+        sameSite: COOKIE_SAME_SITE,
+        maxAge: 1000 * 60 * 15, // 15 mins
+      });
       res.cookie(CSRF_COOKIE_NAME, newCsrf, {
         httpOnly: false,
         sameSite: COOKIE_SAME_SITE,
@@ -183,7 +197,7 @@ export class AuthController {
       logger.info("Token refreshed successfully");
       return successResponse(
         res,
-        tokens,
+        {}, // removed tokens from body
         200,
         "Token Refresh",
         AUTH_SUCCESS_CODES.AUTH_TOKEN_REFRESH_SUCCESS,
@@ -219,6 +233,14 @@ export class AuthController {
       if (refreshToken) {
         await this.logoutUseCase.execute(refreshToken);
       }
+
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: COOKIE_SECURE,
+        domain: COOKIE_DOMAIN,
+        sameSite: COOKIE_SAME_SITE,
+        maxAge: 0,
+      });
 
       res.clearCookie(REFRESH_COOKIE_NAME, {
         httpOnly: true,
@@ -367,13 +389,13 @@ export class AuthController {
         secure: COOKIE_SECURE,
       });
 
-      // Set Access Token (Visible to Client JS)
+      // Set Access Token (Now httpOnly)
       res.cookie("accessToken", accessToken, {
-        httpOnly: false, // Allow client JS to read/remove on logout
+        httpOnly: true, // Switched to true for security
         secure: COOKIE_SECURE,
         domain: COOKIE_DOMAIN,
         sameSite: COOKIE_SAME_SITE,
-        maxAge: 1000 * 60 * 60 * 24, // 1 day
+        maxAge: 1000 * 60 * 15, // 15 minutes
       });
 
       // Set User Data (Visible to Client JS)

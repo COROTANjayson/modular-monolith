@@ -26,10 +26,9 @@ export class AuthRules {
     return { allowed: true };
   }
   static isRefreshTokenValid(
-    tokenJti: string,
-    currentTokenId: string | null,
+    sessionExists: boolean
   ): boolean {
-    return currentTokenId !== null && tokenJti === currentTokenId;
+    return sessionExists;
   }
   static getVerificationTokenExpiry(): Date {
     return new Date(Date.now() + 30 * 60 * 1000);

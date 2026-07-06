@@ -14,7 +14,6 @@ export interface AuthUser {
   isVerified: boolean;
   verificationToken: string | null;
   verificationTokenExpires: Date | null;
-  currentTokenId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,7 +34,6 @@ export interface AuthUserUpdateData {
   password?: string;
   googleId?: string; // Added
   avatar?: string;   // Added
-  currentTokenId?: string | null;
   isVerified?: boolean;
   verificationToken?: string | null;
   verificationTokenExpires?: Date | null;

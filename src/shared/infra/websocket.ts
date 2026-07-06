@@ -68,9 +68,18 @@ export function socketAuthMiddleware(
   next: (err?: Error) => void,
 ): void {
   try {
-    const token =
+    let token =
       socket.handshake.auth?.token ||
       socket.handshake.headers?.authorization?.replace("Bearer ", "");
+
+    if (!token && socket.request.headers.cookie) {
+      const cookies = socket.request.headers.cookie.split(";").reduce((acc: any, cookieString) => {
+        const [key, value] = cookieString.trim().split("=");
+        acc[key] = value;
+        return acc;
+      }, {});
+      token = cookies["accessToken"];
+    }
 
     if (!token) {
       return next(new Error("Authentication required"));

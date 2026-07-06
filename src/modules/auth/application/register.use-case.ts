@@ -77,7 +77,8 @@ export class RegisterUseCase {
 
     // Auto-login after registration
     const jti = this.tokenGenerator.generateUUID();
-    await this.authUserRepo.update(user.id, { currentTokenId: jti });
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
+    await this.authUserRepo.createSession(user.id, jti, expiresAt);
 
     const accessToken = this.tokenGenerator.generateAccessToken({
       id: user.id,

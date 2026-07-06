@@ -38,4 +38,43 @@ export class PrismaAuthUserRepository implements IAuthUserRepository {
       where: { googleId },
     }) as Promise<AuthUser | null>;
   }
+
+  async createSession(userId: string, jti: string, expiresAt: Date, deviceInfo?: string, ipAddress?: string): Promise<void> {
+    await prisma.userSession.create({
+      data: {
+        userId,
+        jti,
+        expiresAt,
+        deviceInfo,
+        ipAddress,
+      },
+    });
+  }
+
+  async findSessionByJti(jti: string): Promise<{ userId: string } | null> {
+    const session = await prisma.userSession.findUnique({
+      where: { jti },
+      select: { userId: true },
+    });
+    return session;
+  }
+
+  async updateSessionJti(oldJti: string, newJti: string, expiresAt: Date): Promise<void> {
+    await prisma.userSession.update({
+      where: { jti: oldJti },
+      data: { jti: newJti, expiresAt },
+    });
+  }
+
+  async revokeAllUserSessions(userId: string): Promise<void> {
+    await prisma.userSession.deleteMany({
+      where: { userId },
+    });
+  }
+
+  async deleteSessionByJti(jti: string): Promise<void> {
+    await prisma.userSession.delete({
+      where: { jti },
+    });
+  }
 }

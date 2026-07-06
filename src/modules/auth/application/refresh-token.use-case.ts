@@ -33,8 +33,11 @@ export class RefreshTokenUseCase {
       );
     }
 
-    // Check token validity using domain rules
-    if (!AuthRules.isRefreshTokenValid(tokenData.jti, user.currentTokenId)) {
+    // Check token validity using domain rules by checking if session exists
+    const session = await this.userRepo.findSessionByJti(tokenData.jti);
+    if (!AuthRules.isRefreshTokenValid(!!session)) {
+      // Possible token reuse attack - revoke all sessions!
+      await this.userRepo.revokeAllUserSessions(user.id);
       throw new AppError(
         "Refresh token revoked or already used",
         401,
@@ -42,9 +45,10 @@ export class RefreshTokenUseCase {
       );
     }
 
-    // Generate new session
+    // Generate new session (rotate JTI)
     const newJti = this.tokenGenerator.generateUUID();
-    await this.userRepo.update(user.id, { currentTokenId: newJti });
+    const newExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
+    await this.userRepo.updateSessionJti(tokenData.jti, newJti, newExpiresAt);
 
     const accessToken = this.tokenGenerator.generateAccessToken({
       id: user.id,

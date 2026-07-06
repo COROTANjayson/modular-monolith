@@ -56,7 +56,8 @@ export class LoginUseCase {
 
     // Generate new session
     const jti = this.tokenGenerator.generateUUID();
-    await this.userRepo.update(user.id, { currentTokenId: jti });
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days matching refresh token
+    await this.userRepo.createSession(user.id, jti, expiresAt);
 
     const accessToken = this.tokenGenerator.generateAccessToken({
       id: user.id,
