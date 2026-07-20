@@ -3,6 +3,9 @@
  */
 
 import { z } from "zod";
+import { OrganizationPermission } from "../public/organization-authorization";
+
+const permissionSchema = z.enum(OrganizationPermission);
 
 export const createOrganizationSchema = z
   .object({
@@ -19,14 +22,14 @@ export const updateOrganizationSchema = z
 export const createRoleSchema = z
   .object({
     name: z.string().min(2).max(50),
-    permissions: z.array(z.string()).optional(),
+    permissions: z.array(permissionSchema).optional(),
   })
   .strict();
 
 export const updateRoleSchema = z
   .object({
     name: z.string().min(2).max(50).optional(),
-    permissions: z.array(z.string()).optional(),
+    permissions: z.array(permissionSchema).optional(),
   })
   .strict();
 

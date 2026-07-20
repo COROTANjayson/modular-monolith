@@ -12,7 +12,6 @@ import {
   OrganizationMemberStatus,
   DefaultRoleNames,
 } from "../domain/member.entity";
-import { OrganizationPermission, hasPermission } from "../domain/permissions";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
 import { ORG_ERROR_CODES } from "../interface/organization.response-codes";
@@ -26,45 +25,11 @@ export class MemberService {
     private userRepository: IUserRepository,
   ) {}
 
-  private async ensureHasPermission(
-    organizationId: string,
-    userId: string,
-    permission: OrganizationPermission,
-  ): Promise<string | undefined> {
-    const member = await this.memberRepository.findMember(
-      organizationId,
-      userId,
-    );
-    if (!member) {
-      throw new AppError(
-        "You are not a member of this organization",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
-
-    if (!member.role?.permissions?.includes(permission)) {
-      throw new AppError(
-        "You do not have permission to perform this action",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
-
-    return member.role?.name;
-  }
-
   async inviteUser(
     organizationId: string,
     data: InviteUserDto,
     inviterId: string,
   ): Promise<OrganizationInvitation> {
-    await this.ensureHasPermission(
-      organizationId,
-      inviterId,
-      OrganizationPermission.MEMBER_INVITE,
-    );
-
     const organization =
       await this.organizationRepository.findById(organizationId);
     if (!organization) {
@@ -75,7 +40,19 @@ export class MemberService {
       );
     }
 
-    if (data.roleId === DefaultRoleNames.OWNER) {
+    const invitationRole = await this.organizationRepository.findRole(
+      data.roleId,
+      organizationId,
+    );
+    if (!invitationRole) {
+      throw new AppError(
+        "Role not found in this organization",
+        400,
+        ERROR_CODES.BAD_REQUEST,
+      );
+    }
+
+    if (invitationRole.name === DefaultRoleNames.OWNER) {
       throw new AppError(
         "An organization can only have one owner",
         400,
@@ -260,15 +237,7 @@ export class MemberService {
     };
   }
 
-  async listMembers(
-    organizationId: string,
-    userId: string,
-  ): Promise<OrganizationMember[]> {
-    await this.ensureHasPermission(
-      organizationId,
-      userId,
-      OrganizationPermission.MEMBER_LIST,
-    );
+  async listMembers(organizationId: string): Promise<OrganizationMember[]> {
     return this.memberRepository.listMembers(organizationId);
   }
 
@@ -292,13 +261,7 @@ export class MemberService {
 
   async listInvitations(
     organizationId: string,
-    userId: string,
   ): Promise<OrganizationInvitation[]> {
-    await this.ensureHasPermission(
-      organizationId,
-      userId,
-      OrganizationPermission.MEMBER_LIST,
-    );
     return this.memberRepository.listInvitations(organizationId);
   }
 
@@ -308,12 +271,6 @@ export class MemberService {
     data: UpdateMemberRoleDto,
     currentUserId: string,
   ): Promise<OrganizationMember> {
-    const currentUserRole = await this.ensureHasPermission(
-      organizationId,
-      currentUserId,
-      OrganizationPermission.MEMBER_UPDATE_ROLE,
-    );
-
     const targetMember = await this.memberRepository.findMember(
       organizationId,
       targetUserId,
@@ -324,23 +281,24 @@ export class MemberService {
 
     if (
       targetMember.role?.name === DefaultRoleNames.OWNER &&
-      currentUserRole === DefaultRoleNames.ADMIN
-    ) {
-      throw new AppError(
-        "Only organization owners can modify their own role",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
-
-    if (
-      targetMember.role?.name === DefaultRoleNames.OWNER &&
       targetUserId !== currentUserId
     ) {
       throw new AppError("Cannot change role of organization owner", 400);
     }
 
-    if (data.roleId === DefaultRoleNames.OWNER) {
+    const nextRole = await this.organizationRepository.findRole(
+      data.roleId,
+      organizationId,
+    );
+    if (!nextRole) {
+      throw new AppError(
+        "Role not found in this organization",
+        400,
+        ERROR_CODES.BAD_REQUEST,
+      );
+    }
+
+    if (nextRole.name === DefaultRoleNames.OWNER) {
       throw new AppError(
         "An organization can only have one owner",
         400,
@@ -360,32 +318,13 @@ export class MemberService {
   async removeMember(
     organizationId: string,
     targetUserId: string,
-    currentUserId: string,
   ): Promise<void> {
-    const currentUserRole = await this.ensureHasPermission(
-      organizationId,
-      currentUserId,
-      OrganizationPermission.MEMBER_REMOVE,
-    );
-
     const targetMember = await this.memberRepository.findMember(
       organizationId,
       targetUserId,
     );
     if (!targetMember) {
       throw new AppError("Member not found", 404, ERROR_CODES.NOT_FOUND);
-    }
-
-    // Protection logic for Owner
-    if (
-      targetMember.role?.name === DefaultRoleNames.OWNER &&
-      currentUserRole !== DefaultRoleNames.OWNER
-    ) {
-      throw new AppError(
-        "Only owners can remove other owners (if multiple existed), and the primary owner cannot be removed.",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
     }
 
     if (targetMember.role?.name === DefaultRoleNames.OWNER) {
@@ -405,14 +344,7 @@ export class MemberService {
   async revokeInvitation(
     organizationId: string,
     invitationId: string,
-    userId: string,
   ): Promise<void> {
-    await this.ensureHasPermission(
-      organizationId,
-      userId,
-      OrganizationPermission.MEMBER_INVITE_REVOKE,
-    );
-
     const invitations = await this.memberRepository.listInvitations(organizationId);
     const invitation = invitations.find(i => i.id === invitationId);
 
@@ -427,14 +359,7 @@ export class MemberService {
     organizationId: string,
     targetUserId: string,
     status: OrganizationMemberStatus,
-    currentUserId: string,
   ): Promise<OrganizationMember> {
-    const currentUserRole = await this.ensureHasPermission(
-      organizationId,
-      currentUserId,
-      OrganizationPermission.MEMBER_UPDATE_STATUS,
-    );
-
     const targetMember = await this.memberRepository.findMember(
       organizationId,
       targetUserId,

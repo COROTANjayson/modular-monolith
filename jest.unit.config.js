@@ -1,0 +1,7 @@
+module.exports = {
+  preset: "ts-jest",
+  testEnvironment: "node",
+  testMatch: ["<rootDir>/tests/unit/**/*.test.ts"],
+  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
+  maxWorkers: 1,
+};

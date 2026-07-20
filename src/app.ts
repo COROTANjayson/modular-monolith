@@ -74,14 +74,17 @@ app.use("/api/v1/auth", authRouter);
 const { router: userRouter } = createUserModule();
 app.use("/api/v1/users", userRouter);
 
-const { router: orgRouter } = createOrganizationModule();
+const { router: orgRouter, authorization: organizationAuthorization } =
+  createOrganizationModule();
 app.use("/api/v1/organizations", orgRouter);
 
 const { router: notificationRouter, notificationGateway } =
   createNotificationModule();
 app.use("/api/v1/notifications", notificationRouter);
 
-const { router: chatRouter, chatGateway } = createChatModule();
+const { router: chatRouter, chatGateway } = createChatModule(
+  organizationAuthorization,
+);
 app.use("/api/v1/chat", chatRouter);
 
 const { router: storageRouter } = createStorageModule();

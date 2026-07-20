@@ -4,7 +4,7 @@
 
 import { IChatMessageRepository } from "../domain/chat-message.repository";
 import { ChatMessage } from "../domain/chat-message.entity";
-import { ITeamRepository } from "../../organization/domain/team.repository";
+import { IOrganizationAuthorization } from "../../organization/public/organization-authorization";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
 import { eventBus } from "../../../shared/infra/event-bus";
@@ -12,28 +12,26 @@ import { eventBus } from "../../../shared/infra/event-bus";
 export class ChatService {
   constructor(
     private chatMessageRepo: IChatMessageRepository,
-    private teamRepo: ITeamRepository
+    private organizationAuthorization: IOrganizationAuthorization,
   ) {}
 
   /**
    * Verify the user is a member of the team (or the leader).
    */
   private async ensureTeamMember(
+    organizationId: string,
     teamId: string,
     userId: string
   ): Promise<void> {
-    const team = await this.teamRepo.findById(teamId);
-    if (!team) {
-      throw new AppError("Team not found", 404, ERROR_CODES.NOT_FOUND);
-    }
-
-    // Leaders are implicitly members
-    if (team.leaderId === userId) return;
-
-    const member = await this.teamRepo.findMember(teamId, userId);
-    if (!member) {
+    const allowed = await this.organizationAuthorization.hasTeamAccess(
+      organizationId,
+      teamId,
+      userId,
+      "chat",
+    );
+    if (!allowed) {
       throw new AppError(
-        "You are not a member of this team",
+        "You are not authorized to access this team chat",
         403,
         ERROR_CODES.FORBIDDEN
       );
@@ -44,11 +42,12 @@ export class ChatService {
    * Send a message to a team chat.
    */
   async sendMessage(
+    organizationId: string,
     teamId: string,
     senderId: string,
     content: string
   ): Promise<ChatMessage> {
-    await this.ensureTeamMember(teamId, senderId);
+    await this.ensureTeamMember(organizationId, teamId, senderId);
 
     const message = await this.chatMessageRepo.create({
       teamId,
@@ -73,12 +72,13 @@ export class ChatService {
    * Get paginated message history for a team.
    */
   async getMessages(
+    organizationId: string,
     teamId: string,
     userId: string,
     cursor?: string,
     limit?: number
   ): Promise<ChatMessage[]> {
-    await this.ensureTeamMember(teamId, userId);
+    await this.ensureTeamMember(organizationId, teamId, userId);
 
     return await this.chatMessageRepo.findByTeamId(teamId, {
       cursor,

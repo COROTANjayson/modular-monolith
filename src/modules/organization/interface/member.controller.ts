@@ -29,7 +29,7 @@ export class MemberController {
     try {
       const { id } = req.params;
       const validatedData = validate(inviteUserSchema, req.body);
-      const userId = (req as any).userId;
+      const userId = req.userId!;
 
       const invitation = await this.memberService.inviteUser(
         id,
@@ -59,7 +59,7 @@ export class MemberController {
 
   async acceptInvitation(req: Request, res: Response) {
     try {
-      const userId = (req as any).userId;
+      const userId = req.userId!;
       const { token } = req.body;
       const validatedData = validate(acceptInvitationSchema, { token });
 
@@ -88,7 +88,7 @@ export class MemberController {
   async getInvitation(req: Request, res: Response) {
     try {
       const { token } = req.params;
-      const userId = (req as any).userId;
+      const userId = req.userId!;
       const result = await this.memberService.getInvitationByToken(token, userId);
       return successResponse(
         res,
@@ -114,8 +114,7 @@ export class MemberController {
   async listMembers(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const userId = (req as any).userId;
-      const members = await this.memberService.listMembers(id, userId);
+      const members = await this.memberService.listMembers(id);
       return successResponse(
         res,
         members,
@@ -140,7 +139,7 @@ export class MemberController {
   async getMe(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const userId = (req as any).userId;
+      const userId = req.userId!;
       const member = await this.memberService.getCurrentMember(id, userId);
       return successResponse(
         res,
@@ -167,7 +166,7 @@ export class MemberController {
     try {
       const { id, userId } = req.params;
       const validatedData = validate(updateMemberRoleSchema, req.body);
-      const currentUserId = (req as any).userId;
+      const currentUserId = req.userId!;
 
       const member = await this.memberService.updateMemberRole(
         id,
@@ -199,8 +198,7 @@ export class MemberController {
   async removeMember(req: Request, res: Response) {
     try {
       const { id, userId } = req.params;
-      const currentUserId = (req as any).userId;
-      await this.memberService.removeMember(id, userId, currentUserId);
+      await this.memberService.removeMember(id, userId);
       return successResponse(
         res,
         {},
@@ -225,8 +223,7 @@ export class MemberController {
   async listInvitations(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const userId = (req as any).userId;
-      const invitations = await this.memberService.listInvitations(id, userId);
+      const invitations = await this.memberService.listInvitations(id);
       return successResponse(
         res,
         invitations,
@@ -251,8 +248,7 @@ export class MemberController {
   async revokeInvitation(req: Request, res: Response) {
     try {
       const { id, invitationId } = req.params;
-      const userId = (req as any).userId;
-      await this.memberService.revokeInvitation(id, invitationId, userId);
+      await this.memberService.revokeInvitation(id, invitationId);
       return successResponse(
         res,
         {},
@@ -278,13 +274,10 @@ export class MemberController {
     try {
       const { id, userId } = req.params;
       const validatedData = validate(updateMemberStatusSchema, req.body);
-      const currentUserId = (req as any).userId;
-
       const member = await this.memberService.updateMemberStatus(
         id,
         userId,
         validatedData.status,
-        currentUserId,
       );
       return successResponse(
         res,

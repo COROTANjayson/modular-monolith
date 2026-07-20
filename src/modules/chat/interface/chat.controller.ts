@@ -16,14 +16,15 @@ export class ChatController {
 
   getMessages = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { teamId } = req.params;
-      const userId = (req as any).userId;
+      const { orgId, teamId } = req.params;
+      const userId = req.userId!;
       const cursor = req.query.cursor as string | undefined;
       const limit = req.query.limit
         ? parseInt(req.query.limit as string, 10)
         : undefined;
 
       const messages = await this.chatService.getMessages(
+        orgId,
         teamId,
         userId,
         cursor,

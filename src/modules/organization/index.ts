@@ -17,13 +17,22 @@ import { TeamService } from "./application/team.service";
 import { TeamController } from "./interface/team.controller";
 import { createMemberRouter } from "./interface/member.routes";
 import { createTeamRouter } from "./interface/team.routes";
+import { OrganizationAuthorizationService } from "./application/organization-authorization.service";
+import { IOrganizationAuthorization } from "./public/organization-authorization";
 
-export function createOrganizationModule(): { router: Router } {
+export function createOrganizationModule(): {
+  router: Router;
+  authorization: IOrganizationAuthorization;
+} {
   // Infrastructure
   const organizationRepo = new PrismaOrganizationRepository();
   const memberRepo = new PrismaMemberRepository();
   const teamRepo = new PrismaTeamRepository();
   const userRepo = new PrismaUserRepository();
+  const authorization = new OrganizationAuthorizationService(
+    memberRepo,
+    teamRepo,
+  );
 
   // Application
   const organizationService = new OrganizationService(
@@ -46,9 +55,19 @@ export function createOrganizationModule(): { router: Router } {
 
   // Router
   const router = Router();
-  router.use("/", createOrganizationRouter(organizationController));
-  router.use("/", createMemberRouter(memberController));
-  router.use("/", createTeamRouter(teamController));
+  router.use(
+    "/",
+    createOrganizationRouter(organizationController, authorization),
+  );
+  router.use("/", createMemberRouter(memberController, authorization));
+  router.use("/", createTeamRouter(teamController, authorization));
 
-  return { router };
+  return { router, authorization };
 }
+
+export type {
+  IOrganizationAuthorization,
+  OrganizationAccess,
+  TeamAccessAction,
+} from "./public/organization-authorization";
+export { OrganizationPermission } from "./public/organization-authorization";

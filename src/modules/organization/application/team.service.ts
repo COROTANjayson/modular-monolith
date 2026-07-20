@@ -6,8 +6,7 @@ import { ITeamRepository } from "../domain/team.repository";
 import { IMemberRepository } from "../domain/member.repository";
 import { Team, TeamMember } from "../domain/team.entity";
 import { CreateTeamDto, UpdateTeamDto, AddTeamMembersDto } from "./team.dto";
-import { DefaultRoleNames } from "../domain/member.entity";
-import { OrganizationPermission, hasPermission } from "../domain/permissions";
+import { OrganizationMemberStatus } from "../domain/member.entity";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
 import { ORG_ERROR_CODES } from "../interface/organization.response-codes";
@@ -17,11 +16,6 @@ export class TeamService {
     private teamRepo: ITeamRepository,
     private memberRepo: IMemberRepository
   ) {}
-
-  private async getMemberRoleName(organizationId: string, userId: string): Promise<string | null> {
-    const member = await this.memberRepo.findMember(organizationId, userId);
-    return member?.role?.name || null;
-  }
 
   private async ensureTeamExists(teamId: string, organizationId: string): Promise<Team> {
     const team = await this.teamRepo.findById(teamId);
@@ -40,16 +34,6 @@ export class TeamService {
     userId: string,
     data: CreateTeamDto
   ): Promise<Team> {
-    const role = await this.getMemberRoleName(organizationId, userId);
-    
-    if (!role || !hasPermission(role, OrganizationPermission.TEAM_CREATE)) {
-      throw new AppError(
-        "Insufficient permissions to create a team",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
-
     // the one that created the team is automatically the leader
     const team = await this.teamRepo.create({
       organizationId,
@@ -66,7 +50,7 @@ export class TeamService {
         const validUserIds: string[] = [];
         for (const memberId of memberIdsToAdd) {
           const orgMember = await this.memberRepo.findMember(organizationId, memberId);
-          if (orgMember) {
+          if (orgMember?.status === OrganizationMemberStatus.ACTIVE) {
             validUserIds.push(memberId);
           }
         }
@@ -88,15 +72,6 @@ export class TeamService {
   ): Promise<Team> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 
-    // only the leader of the team can update the team details
-    if (team.leaderId !== userId) {
-      throw new AppError(
-        "Only the team leader can update team details",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
-
     return await this.teamRepo.update(teamId, data);
   }
 
@@ -106,19 +81,6 @@ export class TeamService {
     teamId: string,
   ): Promise<void> {
     const team = await this.ensureTeamExists(teamId, organizationId);
-
-    const role = await this.getMemberRoleName(organizationId, userId);
-    const isLeader = team.leaderId === userId;
-
-    const canDelete = isLeader || hasPermission(role ?? undefined, OrganizationPermission.TEAM_DELETE);
-
-    if (!canDelete) {
-      throw new AppError(
-        "Insufficient permissions to delete this team",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
 
     await this.teamRepo.delete(teamId);
   }
@@ -131,19 +93,9 @@ export class TeamService {
   ): Promise<TeamMember> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 
-    const isLeader = team.leaderId === actorId;
-
-    if (!isLeader) {
-      throw new AppError(
-        "Only the team creator can add members",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
-
     // Check if target user is in the organization
     const targetMember = await this.memberRepo.findMember(organizationId, targetUserId);
-    if (!targetMember) {
+    if (!targetMember || targetMember.status !== OrganizationMemberStatus.ACTIVE) {
       throw new AppError(
         "User is not a member of the organization",
         400,
@@ -172,23 +124,13 @@ export class TeamService {
   ): Promise<{ added: TeamMember[]; skipped: string[] }> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 
-    const isLeader = team.leaderId === actorId;
-
-    if (!isLeader) {
-      throw new AppError(
-        "Only the team creator can add members",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
-
     const validUserIds: string[] = [];
     const skipped: string[] = [];
 
     for (const userId of userIds) {
       // Check org membership
       const orgMember = await this.memberRepo.findMember(organizationId, userId);
-      if (!orgMember) {
+      if (!orgMember || orgMember.status !== OrganizationMemberStatus.ACTIVE) {
         skipped.push(userId);
         continue;
       }
@@ -219,16 +161,6 @@ export class TeamService {
   ): Promise<void> {
     const team = await this.ensureTeamExists(teamId, organizationId);
 
-    const isLeader = team.leaderId === actorId;
-
-    if (!isLeader) {
-      throw new AppError(
-        "Only the team creator can remove members",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
-    
     // Prevent removing the leader
     if (targetUserId === team.leaderId) {
       throw new AppError(
@@ -244,19 +176,6 @@ export class TeamService {
   async getTeam(organizationId: string, userId: string, teamId: string): Promise<Team> {
     const team = await this.ensureTeamExists(teamId, organizationId);
     
-    const isTeamMember = await this.teamRepo.findMember(teamId, userId);
-    const isLeader = team.leaderId === userId;
-    const role = await this.getMemberRoleName(organizationId, userId);
-    const isOwnerOrAdmin = role === DefaultRoleNames.OWNER || role === DefaultRoleNames.ADMIN;
-
-    if (!isTeamMember && !isLeader && !isOwnerOrAdmin) {
-      throw new AppError(
-        "Access denied. You must be a member of the team or an admin to view details",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
-
     return team;
   }
 

@@ -47,15 +47,21 @@ export class ChatGateway {
 
         /**
          * Client joins a team chat room.
-         * Payload: { teamId: string }
+         * Payload: { orgId: string, teamId: string }
          */
-        socket.on("join-team", async (data: { teamId: string }) => {
+        socket.on("join-team", async (data: { orgId: string; teamId: string }) => {
           try {
-            const { teamId } = data;
+            const { orgId, teamId } = data;
 
             // Verify membership via the service (which checks team repo)
             // We do a lightweight check by trying to get messages (limit 0)
-            await this.chatService.getMessages(teamId, userId, undefined, 1);
+            await this.chatService.getMessages(
+              orgId,
+              teamId,
+              userId,
+              undefined,
+              1,
+            );
 
             socket.join(`team:${teamId}`);
             logger.info(
@@ -85,13 +91,13 @@ export class ChatGateway {
 
         /**
          * Client sends a message to a team chat.
-         * Payload: { teamId: string, content: string }
+         * Payload: { orgId: string, teamId: string, content: string }
          */
         socket.on(
           "send-message",
-          async (data: { teamId: string; content: string }) => {
+          async (data: { orgId: string; teamId: string; content: string }) => {
             try {
-              const { teamId, content } = data;
+              const { orgId, teamId, content } = data;
 
               if (!content || content.trim().length === 0) {
                 socket.emit("error", { message: "Message content is required" });
@@ -99,6 +105,7 @@ export class ChatGateway {
               }
 
               const message = await this.chatService.sendMessage(
+                orgId,
                 teamId,
                 userId,
                 content.trim(),

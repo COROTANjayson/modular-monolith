@@ -61,15 +61,3 @@ export const ROLE_PERMISSIONS: Record<string, OrganizationPermission[]> = {
     OrganizationPermission.TEAM_READ,
   ],
 };
-
-/**
- * Checks if a given role has a specific permission
- */
-export function hasPermission(
-  roleName: string | undefined,
-  permission: OrganizationPermission,
-): boolean {
-  if (!roleName) return false;
-  if (roleName === DefaultRoleNames.OWNER) return true;
-  return ROLE_PERMISSIONS[roleName]?.includes(permission) || false;
-}

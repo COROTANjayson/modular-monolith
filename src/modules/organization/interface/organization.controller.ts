@@ -27,7 +27,7 @@ export class OrganizationController {
 
   async create(req: Request, res: Response) {
     try {
-      const userId = (req as any).userId;
+      const userId = req.userId!;
       const validatedData = validate(createOrganizationSchema, req.body);
 
       const organization = await this.organizationService.createOrganization(
@@ -57,7 +57,7 @@ export class OrganizationController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const userId = (req as any).userId;
+      const userId = req.userId!;
       const organizations =
         await this.organizationService.getUserOrganizations(userId);
       return successResponse(
@@ -84,12 +84,7 @@ export class OrganizationController {
   async getById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const userId = (req as any).userId;
-
-      const organization = await this.organizationService.getOrganization(
-        id,
-        userId,
-      );
+      const organization = await this.organizationService.getOrganization(id);
       return successResponse(
         res,
         organization,
@@ -115,12 +110,9 @@ export class OrganizationController {
     try {
       const { id } = req.params;
       const validatedData = validate(updateOrganizationSchema, req.body);
-      const userId = (req as any).userId;
-
       const organization = await this.organizationService.updateOrganization(
         id,
         validatedData,
-        userId,
       );
       return successResponse(
         res,
@@ -146,9 +138,7 @@ export class OrganizationController {
   async getRoles(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const userId = (req as any).userId;
-
-      const roles = await this.organizationService.getOrganizationRoles(id, userId);
+      const roles = await this.organizationService.getOrganizationRoles(id);
       return successResponse(
         res,
         roles,
@@ -173,12 +163,10 @@ export class OrganizationController {
   async createRole(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const userId = (req as any).userId;
       const validatedData = validate(createRoleSchema, req.body);
 
       const role = await this.organizationService.createRole(
         id,
-        userId,
         validatedData.name,
         validatedData.permissions || []
       );
@@ -200,13 +188,11 @@ export class OrganizationController {
   async updateRole(req: Request, res: Response) {
     try {
       const { id, roleId } = req.params;
-      const userId = (req as any).userId;
       const validatedData = validate(updateRoleSchema, req.body);
 
       const role = await this.organizationService.updateRole(
         roleId,
         id,
-        userId,
         validatedData
       );
       return successResponse(
@@ -227,9 +213,7 @@ export class OrganizationController {
   async deleteRole(req: Request, res: Response) {
     try {
       const { id, roleId } = req.params;
-      const userId = (req as any).userId;
-
-      await this.organizationService.deleteRole(roleId, id, userId);
+      await this.organizationService.deleteRole(roleId, id);
       return successResponse(
         res,
         null,

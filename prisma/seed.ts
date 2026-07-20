@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { DefaultRoleNames } from '../src/modules/organization/domain/member.entity';
+import { ROLE_PERMISSIONS } from '../src/modules/organization/domain/permissions';
 
 const prisma = new PrismaClient();
 
@@ -83,29 +85,25 @@ async function main() {
   console.log('Seeded organization:', org.name);
 
   // 2.5 Create Default Roles
-  const ownerRole = await prisma.role.upsert({
-    where: { organizationId_name: { organizationId: org.id, name: 'owner' } },
-    update: {},
-    create: { organizationId: org.id, name: 'owner', permissions: [], isDefault: true }
-  });
-  
-  const adminRole = await prisma.role.upsert({
-    where: { organizationId_name: { organizationId: org.id, name: 'admin' } },
-    update: {},
-    create: { organizationId: org.id, name: 'admin', permissions: [], isDefault: true }
-  });
-  
-  const teamLeadRole = await prisma.role.upsert({
-    where: { organizationId_name: { organizationId: org.id, name: 'team_lead' } },
-    update: {},
-    create: { organizationId: org.id, name: 'team_lead', permissions: [], isDefault: true }
-  });
-  
-  const memberRole = await prisma.role.upsert({
-    where: { organizationId_name: { organizationId: org.id, name: 'member' } },
-    update: {},
-    create: { organizationId: org.id, name: 'member', permissions: [], isDefault: true }
-  });
+  const upsertDefaultRole = (name: string) => {
+    const permissions = ROLE_PERMISSIONS[name] ?? [];
+
+    return prisma.role.upsert({
+      where: { organizationId_name: { organizationId: org.id, name } },
+      update: { permissions, isDefault: true },
+      create: {
+        organizationId: org.id,
+        name,
+        permissions,
+        isDefault: true,
+      },
+    });
+  };
+
+  const ownerRole = await upsertDefaultRole(DefaultRoleNames.OWNER);
+  const adminRole = await upsertDefaultRole(DefaultRoleNames.ADMIN);
+  const teamLeadRole = await upsertDefaultRole(DefaultRoleNames.TEAM_LEAD);
+  const memberRole = await upsertDefaultRole(DefaultRoleNames.MEMBER);
 
   console.log('Seeded default roles for:', org.name);
 

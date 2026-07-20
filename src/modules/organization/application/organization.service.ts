@@ -13,7 +13,6 @@ import {
   OrganizationMemberStatus,
   DefaultRoleNames,
 } from "../domain/member.entity";
-import { OrganizationPermission, hasPermission } from "../domain/permissions";
 import { AppError } from "../../../shared/utils/app-error";
 import { ERROR_CODES } from "../../../shared/utils/response-code";
 import { ORG_ERROR_CODES } from "../interface/organization.response-codes";
@@ -23,37 +22,6 @@ export class OrganizationService {
     private organizationRepository: IOrganizationRepository,
     private memberRepository: IMemberRepository,
   ) {}
-
-  private async ensureHasPermission(
-    organizationId: string,
-    userId: string,
-    permission: OrganizationPermission,
-  ): Promise<string | undefined> {
-    const member = await this.memberRepository.findMember(
-      organizationId,
-      userId,
-    );
-    if (!member) {
-      throw new AppError(
-        "You are not a member of this organization",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
-
-    if (
-      member.role?.name !== DefaultRoleNames.OWNER &&
-      !member.role?.permissions?.includes(permission)
-    ) {
-      throw new AppError(
-        "You do not have permission to perform this action",
-        403,
-        ERROR_CODES.FORBIDDEN,
-      );
-    }
-
-    return member.role?.name;
-  }
 
   async createOrganization(
     ownerId: string,
@@ -82,9 +50,7 @@ export class OrganizationService {
     return organization;
   }
 
-  async getOrganization(id: string, userId: string): Promise<Organization> {
-    await this.ensureHasPermission(id, userId, OrganizationPermission.ORG_READ);
-
+  async getOrganization(id: string): Promise<Organization> {
     const organization = await this.organizationRepository.findById(id);
     if (!organization) {
       throw new AppError(
@@ -103,14 +69,7 @@ export class OrganizationService {
   async updateOrganization(
     id: string,
     data: UpdateOrganizationDto,
-    userId: string,
   ): Promise<Organization> {
-    await this.ensureHasPermission(
-      id,
-      userId,
-      OrganizationPermission.ORG_UPDATE,
-    );
-
     const organization = await this.organizationRepository.findById(id);
     if (!organization) {
       throw new AppError(
@@ -123,23 +82,14 @@ export class OrganizationService {
     return this.organizationRepository.update(id, data);
   }
 
-  async getOrganizationRoles(
-    id: string,
-    userId: string,
-  ): Promise<
+  async getOrganizationRoles(id: string): Promise<
     { id: string; name: string; isDefault: boolean; permissions: string[] }[]
   > {
-    await this.ensureHasPermission(
-      id,
-      userId,
-      OrganizationPermission.ROLE_READ,
-    );
     return this.organizationRepository.getRoles(id);
   }
 
   async createRole(
     organizationId: string,
-    userId: string,
     name: string,
     permissions: string[],
   ): Promise<{
@@ -148,11 +98,6 @@ export class OrganizationService {
     isDefault: boolean;
     permissions: string[];
   }> {
-    await this.ensureHasPermission(
-      organizationId,
-      userId,
-      OrganizationPermission.ROLE_CREATE,
-    );
     return this.organizationRepository.createRole(
       organizationId,
       name,
@@ -163,7 +108,6 @@ export class OrganizationService {
   async updateRole(
     id: string,
     organizationId: string,
-    userId: string,
     data: { name?: string; permissions?: string[] },
   ): Promise<{
     id: string;
@@ -171,12 +115,6 @@ export class OrganizationService {
     isDefault: boolean;
     permissions: string[];
   }> {
-    await this.ensureHasPermission(
-      organizationId,
-      userId,
-      OrganizationPermission.ROLE_UPDATE,
-    );
-
     const role = await this.organizationRepository.findRole(id, organizationId);
     if (!role) {
       throw new AppError("Role not found", 404, ORG_ERROR_CODES.ORG_NOT_FOUND); // Can create a ROLE_NOT_FOUND
@@ -196,14 +134,7 @@ export class OrganizationService {
   async deleteRole(
     id: string,
     organizationId: string,
-    userId: string,
   ): Promise<void> {
-    await this.ensureHasPermission(
-      organizationId,
-      userId,
-      OrganizationPermission.ROLE_DELETE,
-    );
-
     const role = await this.organizationRepository.findRole(id, organizationId);
     if (!role) {
       throw new AppError("Role not found", 404, ORG_ERROR_CODES.ORG_NOT_FOUND);

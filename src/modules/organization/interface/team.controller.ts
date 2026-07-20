@@ -23,7 +23,7 @@ export class TeamController {
   createTeam = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { organizationId } = req.params;
-      const userId = (req as any).userId;
+      const userId = req.userId!;
       const validatedData = validate(createTeamSchema, req.body);
 
       const team = await this.teamService.createTeam(
@@ -50,7 +50,7 @@ export class TeamController {
   updateTeam = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { organizationId, teamId } = req.params;
-      const userId = (req as any).userId;
+      const userId = req.userId!;
       const validatedData = validate(updateTeamSchema, req.body);
 
       const team = await this.teamService.updateTeam(
@@ -78,7 +78,7 @@ export class TeamController {
   deleteTeam = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { organizationId, teamId } = req.params;
-      const userId = (req as any).userId;
+      const userId = req.userId!;
 
       await this.teamService.deleteTeam(organizationId, userId, teamId);
 
@@ -100,7 +100,7 @@ export class TeamController {
   addMembers = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { organizationId, teamId } = req.params;
-      const actorId = (req as any).userId;
+      const actorId = req.userId!;
       const validatedData = validate(addTeamMembersSchema, req.body);
 
       const result = await this.teamService.addMembers(
@@ -128,7 +128,7 @@ export class TeamController {
   removeMember = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { organizationId, teamId, userId } = req.params;
-      const actorId = (req as any).userId;
+      const actorId = req.userId!;
 
       await this.teamService.removeMember(organizationId, actorId, teamId, userId);
 
@@ -150,7 +150,7 @@ export class TeamController {
   getTeam = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { organizationId, teamId } = req.params;
-      const userId = (req as any).userId;
+      const userId = req.userId!;
 
       const team = await this.teamService.getTeam(organizationId, userId, teamId);
 
@@ -172,7 +172,7 @@ export class TeamController {
   getTeams = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { organizationId } = req.params;
-      const userId = (req as any).userId;
+      const userId = req.userId!;
 
       const teams = await this.teamService.getTeams(organizationId, userId);
 
@@ -194,7 +194,7 @@ export class TeamController {
   getMyTeams = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { organizationId } = req.params;
-      const userId = (req as any).userId;
+      const userId = req.userId!;
       
       const teams = await this.teamService.getMyTeams(organizationId, userId);
 

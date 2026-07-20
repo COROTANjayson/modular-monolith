@@ -22,8 +22,11 @@ export function authMiddleware(
   if (!token) return res.status(401).json({ error: "Missing token" });
 
   try {
-    const payload: any = jwt.verify(token, ACCESS_SECRET);
-    (req as any).userId = payload.id;
+    const payload = jwt.verify(token, ACCESS_SECRET);
+    if (typeof payload === "string" || typeof payload.id !== "string") {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+    req.userId = payload.id;
     next();
   } catch (err) {
     return res.status(401).json({ error: "Invalid token" });

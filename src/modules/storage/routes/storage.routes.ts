@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { StorageController } from '../controllers/storage.controller';
 import multer from 'multer';
+import { authMiddleware } from '../../auth';
 
 export const createStorageRouter = (): Router => {
   const router = Router();
   const controller = new StorageController();
+  router.use(authMiddleware);
   
   // Use memory storage to supply a buffer directly to our providers (Sharp, S3, ImageKit)
   const upload = multer({ storage: multer.memoryStorage() });
